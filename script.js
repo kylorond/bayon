@@ -1,8 +1,10 @@
 let transactions = JSON.parse(localStorage.getItem('finvault_tx')) || [];
 let budgets = JSON.parse(localStorage.getItem('finvault_budgets')) || {};
+let reminders = JSON.parse(localStorage.getItem('finvault_reminders')) || [];
+let goals = JSON.parse(localStorage.getItem('finvault_goals')) || [];
 let mainChart = null, donutChart = null;
 let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-
+let searchTimeout;
 const CATEGORIES = {
     expense: ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Investasi', 'Tarik Tunai', 'Lainnya'],
     income: ['Gaji', 'Bonus', 'Freelance', 'Hadiah', 'Bunga Bank', 'Lainnya']
@@ -12,11 +14,27 @@ const CATEGORY_ICONS = {
     'Pendidikan':'fa-graduation-cap','Investasi':'fa-chart-line','Tarik Tunai':'fa-hand-holding-dollar','Lainnya':'fa-ellipsis','Gaji':'fa-money-bill-wave','Bonus':'fa-certificate',
     'Freelance':'fa-laptop-code','Hadiah':'fa-gift','Bunga Bank':'fa-building-columns'
 };
-
 function formatIDR(num) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num); }
-
+function showToast(message, duration = 3000) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.remove('invisible', 'opacity-0', 'translate-y-2');
+    toast.classList.add('opacity-100', 'translate-y-0');
+    setTimeout(() => {
+        toast.classList.add('invisible', 'opacity-0', 'translate-y-2');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+    }, duration);
+}
+function updateGreeting() {
+    const hour = new Date().getHours();
+    let greeting = '';
+    if (hour < 12) greeting = 'pagi';
+    else if (hour < 15) greeting = 'siang';
+    else if (hour < 18) greeting = 'sore';
+    else greeting = 'malam';
+    document.getElementById('greeting').innerText = `Hai, selamat ${greeting}`;
+}
 function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
-
 function toggleSidebarCollapse() {
     if (window.innerWidth < 1024) return;
     isSidebarCollapsed = !isSidebarCollapsed;
@@ -36,33 +54,31 @@ function toggleSidebarCollapse() {
     }
     localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
 }
-
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('-translate-x-full');
     document.getElementById('mobile-overlay').classList.toggle('hidden');
 }
-
 function closeSidebar() {
     document.getElementById('sidebar').classList.add('-translate-x-full');
     document.getElementById('mobile-overlay').classList.add('hidden');
 }
-
 function switchTab(tabId) {
-    ['dashboard','transactions','budget'].forEach(t => {
+    ['dashboard','transactions','budget','reminders','goals'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
         const btn = document.getElementById(`nav-${t}`);
-        if(btn) btn.className = "nav-item w-full flex items-center px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 font-medium transition-all gap-4";
+        if(btn) btn.className = "nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4";
     });
     document.getElementById(`view-${tabId}`).classList.remove('hidden');
     const activeBtn = document.getElementById(`nav-${tabId}`);
-    if(activeBtn) activeBtn.className = "nav-item-active nav-item w-full flex items-center px-4 py-3 rounded-xl text-brand-600 dark:text-brand-400 font-semibold transition-all gap-4";
-    const titles = { dashboard:'Ringkasan', transactions:'Transaksi', budget:'Anggaran' };
+    if(activeBtn) activeBtn.className = "nav-item-active nav-item w-full flex items-center px-4 py-3 rounded-2xl text-brand-600 dark:text-brand-400 font-semibold transition-all gap-4";
+    const titles = { dashboard:'Ringkasan', transactions:'Transaksi', budget:'Anggaran', reminders:'Pengingat', goals:'Target' };
     document.getElementById('header-title').innerText = titles[tabId];
     if(tabId==='transactions') renderFullTransactions();
     if(tabId==='budget') renderBudgetSettings();
+    if(tabId==='reminders') renderReminders();
+    if(tabId==='goals') renderGoals();
     if(window.innerWidth<1024) closeSidebar();
 }
-
 function calculateBalances() {
     const balanceMap = {};
     transactions.forEach(t => {
@@ -73,7 +89,6 @@ function calculateBalances() {
     });
     return balanceMap;
 }
-
 function renderAccountBalances() {
     const balances = calculateBalances();
     const total = Object.values(balances).reduce((a,b) => a + b, 0);
@@ -82,8 +97,8 @@ function renderAccountBalances() {
     if (!container) return;
     const sorted = Object.entries(balances).sort((a,b) => b[1] - a[1]);
     container.innerHTML = sorted.map(([acc, bal]) => `
-        <div class="glass bg-white/40 dark:bg-slate-800/40 p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-200/30 dark:border-dark-border/50 flex items-center gap-2 md:gap-3 hover:shadow-md transition-shadow">
-            <div class="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-brand-100/60 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 text-sm md:text-base">
+        <div class="glass bg-white/40 dark:bg-dark-surface/40 p-3 md:p-4 rounded-2xl md:rounded-3xl border border-slate-200/30 dark:border-dark-border/50 flex items-center gap-2 md:gap-3 hover:shadow-md transition-shadow">
+            <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-brand-100/60 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 text-sm md:text-base">
                 <i class="fa-solid ${acc.toLowerCase().includes('cash') ? 'fa-money-bill' : 'fa-building-columns'}"></i>
             </div>
             <div class="min-w-0 flex-1">
@@ -94,7 +109,6 @@ function renderAccountBalances() {
     `).join('');
     if (sorted.length === 0) container.innerHTML = '<div class="col-span-full text-center text-slate-400 py-4 text-xs md:text-sm">Belum ada saldo akun</div>';
 }
-
 function updateDateLabel() {
     const input = document.getElementById('date-filter');
     const label = document.getElementById('date-label');
@@ -106,7 +120,6 @@ function updateDateLabel() {
         label.innerText = '';
     }
 }
-
 function refreshAll() {
     const filter = document.getElementById('date-filter').value;
     const filtered = transactions.filter(t => t.date.startsWith(filter));
@@ -120,16 +133,16 @@ function refreshAll() {
     renderDashboardList(filtered);
     renderBudgets(filtered);
     updateCharts(filtered);
+    renderReminders();
+    renderGoals();
 }
-
 function renderDashboardList(data) {
     const list = document.getElementById('dashboard-tx-list');
-    list.innerHTML = data.slice(0,5).map(t => `<tr class="group hover:bg-slate-100/50 dark:hover:bg-slate-800/30 transition">
-        <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-slate-200/50 dark:bg-slate-800 flex items-center justify-center text-slate-500 text-xs md:text-base"><i class="fa-solid ${CATEGORY_ICONS[t.category]||'fa-tag'}"></i></div><div><p class="font-bold text-xs md:text-sm">${t.desc||t.category}</p><p class="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase">${t.date}</p></div></div></td>
-        <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type==='income'?'text-emerald-500':'text-slate-900 dark:text-white'}">${t.type==='income'?'+':'-'} ${formatIDR(t.amount)}</td></tr>`).join('');
+    list.innerHTML = data.slice(0,5).map(t => `<tr class="group hover:bg-slate-100/50 dark:hover:bg-dark-border/30 transition">
+        <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-slate-200/50 dark:bg-dark-surface flex items-center justify-center text-slate-500 text-xs md:text-base"><i class="fa-solid ${CATEGORY_ICONS[t.category]||'fa-tag'}"></i></div><div><p class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-300">${t.desc||t.category}</p><p class="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase">${t.date}</p></div></div></td>
+        <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type==='income'?'text-emerald-600':'text-slate-800 dark:text-white'}">${t.type==='income'?'+':'-'} ${formatIDR(t.amount)}</td></tr>`).join('');
     if(data.length===0) list.innerHTML = '<tr><td colspan="2" class="p-6 md:p-10 text-center text-slate-400 text-xs md:text-sm">Belum ada transaksi</td></tr>';
 }
-
 function renderBudgets(data) {
     const container = document.getElementById('budget-progress-list');
     const expByCat = {}; data.filter(t=>t.type==='expense').forEach(t=> expByCat[t.category] = (expByCat[t.category]||0)+t.amount);
@@ -139,32 +152,30 @@ function renderBudgets(data) {
         if(limit>0) {
             const spent = expByCat[cat]||0; const perc = Math.min((spent/limit)*100,100);
             totalLimit+=limit; totalSpent+=spent;
-            html += `<div><div class="flex justify-between text-[10px] md:text-xs font-bold mb-1"><span>${cat}</span><span class="${perc>=90?'text-rose-500':'text-slate-400'}">${perc.toFixed(0)}%</span></div>
-            <div class="h-1.5 md:h-2 w-full bg-slate-200/60 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-500 to-brand-400 transition-all duration-700" style="width:${perc}%"></div></div>
+            html += `<div><div class="flex justify-between text-[10px] md:text-xs font-bold mb-1"><span>${cat}</span><span class="${perc>=90?'text-rose-600':'text-slate-400'}">${perc.toFixed(0)}%</span></div>
+            <div class="h-1.5 md:h-2 w-full bg-slate-200/60 dark:bg-dark-border rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-500 to-brand-400 transition-all duration-700" style="width:${perc}%"></div></div>
             <div class="flex justify-between text-[8px] md:text-[9px] font-bold text-slate-400 mt-1"><span>${formatIDR(spent)}</span><span>${formatIDR(limit)}</span></div></div>`;
         }
     });
     container.innerHTML = html || '<div class="text-center p-4 md:p-6 text-slate-400 text-xs md:text-sm">Belum ada anggaran diatur.</div>';
     document.getElementById('budget-percentage').innerText = totalLimit>0 ? (totalSpent/totalLimit*100).toFixed(0)+'%' : '0%';
 }
-
 function renderBudgetSettings() {
     const container = document.getElementById('budget-input-list');
     container.innerHTML = CATEGORIES.expense.map(cat => `
-        <div class="flex items-center gap-2 md:gap-3 bg-white/50 dark:bg-slate-800/50 p-3 md:p-4 rounded-xl md:rounded-2xl">
-            <div class="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-white dark:bg-dark-surface flex items-center justify-center text-slate-400 shadow-sm text-xs md:text-base"><i class="fa-solid ${CATEGORY_ICONS[cat]}"></i></div>
-            <div class="flex-1"><p class="text-[9px] md:text-xs font-bold text-slate-500 mb-1">${cat}</p><div class="relative"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] md:text-xs">Rp</span><input type="number" name="budget-${cat}" value="${budgets[cat]||''}" placeholder="Batas" class="w-full pl-4 md:pl-5 bg-transparent border-none p-0 focus:ring-0 text-xs md:text-sm font-black outline-none"></div></div>
+        <div class="flex items-center gap-2 md:gap-3 bg-white/50 dark:bg-dark-surface/50 p-3 md:p-4 rounded-2xl md:rounded-3xl">
+            <div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-white dark:bg-dark-surface flex items-center justify-center text-slate-400 shadow-sm text-xs md:text-base"><i class="fa-solid ${CATEGORY_ICONS[cat]}"></i></div>
+            <div class="flex-1"><p class="text-[9px] md:text-xs font-bold text-slate-500 mb-1">${cat}</p><div class="relative"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] md:text-xs">Rp</span><input type="number" name="budget-${cat}" value="${budgets[cat]||''}" placeholder="Batas" class="w-full pl-4 md:pl-5 bg-transparent border-none p-0 focus:ring-0 text-xs md:text-sm font-black outline-none text-slate-800 dark:text-slate-300"></div></div>
         </div>`).join('');
 }
-
 function saveBudgets(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     CATEGORIES.expense.forEach(cat => { budgets[cat] = parseFloat(formData.get(`budget-${cat}`))||0; });
     localStorage.setItem('finvault_budgets', JSON.stringify(budgets));
     refreshAll(); switchTab('dashboard');
+    showToast('Anggaran diperbarui');
 }
-
 function updateCharts(data) {
     const expByCat = {}; data.filter(t=>t.type==='expense').forEach(t=> expByCat[t.category] = (expByCat[t.category]||0)+t.amount);
     const donutCtx = document.getElementById('donutChart').getContext('2d');
@@ -175,18 +186,17 @@ function updateCharts(data) {
             labels: Object.keys(expByCat),
             datasets: [{
                 data: Object.values(expByCat),
-                backgroundColor: ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#ec4899','#f97316'],
+                backgroundColor: ['#6366f1','#818cf8','#a5b4fc','#c7d2fe','#e0e7ff','#4f46e5','#4338ca','#3730a3'],
                 borderWidth: 0,
                 hoverOffset: 8
             }]
         },
-        options: { cutout: '75%', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', titleColor: '#f1f5f9' } } }
+        options: { cutout: '75%', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', titleColor: '#f8fafc' } } }
     });
     const legend = document.getElementById('chart-legend');
     legend.innerHTML = Object.entries(expByCat).slice(0,5).map(([cat,val],i)=>`
         <div class="flex justify-between items-center text-[10px] md:text-xs font-medium"><div class="flex items-center gap-1 md:gap-2"><div class="w-2 h-2 md:w-3 md:h-3 rounded-full" style="background:${donutChart.data.datasets[0].backgroundColor[i]}"></div><span>${cat}</span></div><span class="font-bold">${formatIDR(val)}</span></div>
     `).join('');
-
     const days = Array.from({length:31},(_,i)=>(i+1).toString().padStart(2,'0'));
     const dailyInc = new Array(31).fill(0), dailyExp = new Array(31).fill(0);
     data.forEach(t => { let d = parseInt(t.date.split('-')[2])-1; if(t.type==='income') dailyInc[d]+=t.amount; else dailyExp[d]+=t.amount; });
@@ -201,7 +211,6 @@ function updateCharts(data) {
         options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{display:false}, x:{grid:{display:false}, ticks:{font:{size:8}}}} }
     });
 }
-
 function renderFullTransactions() {
     const globalSearch = document.getElementById('tx-search').value.toLowerCase();
     const typeFilter = document.getElementById('tx-type-filter').value;
@@ -211,16 +220,19 @@ function renderFullTransactions() {
         return matchGlobal && matchType;
     });
     document.getElementById('full-tx-body').innerHTML = filtered.map(t => `
-        <tr class="hover:bg-slate-100/50 dark:hover:bg-slate-800/30 transition">
-            <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-white/60 dark:bg-dark-surface flex items-center justify-center"><i class="fa-solid ${CATEGORY_ICONS[t.category]||'fa-tag'} text-slate-500 text-xs md:text-base"></i></div><div><p class="font-bold text-xs md:text-sm">${t.desc||'—'}</p><p class="text-[8px] md:text-[9px] text-slate-400 uppercase">${t.date}</p></div></div></td>
-            <td class="px-4 md:px-6 py-3 md:py-4"><span class="px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[9px] font-black uppercase bg-slate-200/50 dark:bg-slate-800 text-slate-600 dark:text-slate-300">${t.category}</span></td>
-            <td class="px-4 md:px-6 py-3 md:py-4"><span class="text-[10px] md:text-xs font-semibold"><i class="fa-regular fa-building mr-1"></i>${t.account}</span></td>
-            <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type==='income'?'text-emerald-500':'text-slate-900 dark:text-white'}">${t.type==='income'?'+':'-'} ${formatIDR(t.amount)}</td>
-            <td class="px-4 md:px-6 py-3 md:py-4 text-center"><button onclick="deleteTx(${t.id})" class="w-6 h-6 md:w-7 md:h-7 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-500/10 transition-all"><i class="fa-solid fa-trash-can text-[10px] md:text-xs"></i></button></td>
+        <tr class="hover:bg-slate-100/50 dark:hover:bg-dark-border/30 transition">
+            <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-white/60 dark:bg-dark-surface flex items-center justify-center"><i class="fa-solid ${CATEGORY_ICONS[t.category]||'fa-tag'} text-slate-500 text-xs md:text-base"></i></div><div><p class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-300">${t.desc||'—'}</p><p class="text-[8px] md:text-[9px] text-slate-400 uppercase">${t.date}</p></div></div></td>
+            <td class="px-4 md:px-6 py-3 md:py-4"><span class="px-1.5 md:px-2 py-0.5 md:py-1 rounded-xl text-[8px] md:text-[9px] font-black uppercase bg-slate-200/50 dark:bg-dark-surface text-slate-600 dark:text-slate-400">${t.category}</span></td>
+            <td class="px-4 md:px-6 py-3 md:py-4"><span class="text-[10px] md:text-xs font-semibold"><i class="fa-regular fa-building mr-1 text-slate-400"></i>${t.account}</span></td>
+            <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type==='income'?'text-emerald-600':'text-slate-800 dark:text-white'}">${t.type==='income'?'+':'-'} ${formatIDR(t.amount)}</td>
+            <td class="px-4 md:px-6 py-3 md:py-4 text-center"><button onclick="deleteTx(${t.id})" class="w-6 h-6 md:w-7 md:h-7 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-500/10 transition-all"><i class="fa-solid fa-trash-can text-[10px] md:text-xs"></i></button></td>
         </tr>`).join('');
     if(filtered.length===0) document.getElementById('full-tx-body').innerHTML = '<tr><td colspan="5" class="p-6 md:p-10 text-center text-slate-400 text-xs md:text-sm">Tidak ada transaksi</td></tr>';
 }
-
+document.getElementById('tx-search').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => renderFullTransactions(), 300);
+});
 function handleSubmit(e) {
     e.preventDefault();
     const type = document.getElementById('f-type').value;
@@ -229,7 +241,9 @@ function handleSubmit(e) {
     const account = document.getElementById('f-account').value;
     const category = document.getElementById('f-category').value;
     const desc = document.getElementById('f-desc').value;
-
+    const recurring = document.getElementById('f-recurring').checked;
+    let recurringType = null;
+    if (recurring) recurringType = document.getElementById('f-recurring-type').value;
     if (type === 'expense' && category === 'Tarik Tunai') {
         if (account === 'Cash') {
             alert('Tidak dapat melakukan tarik tunai dari akun Cash.');
@@ -262,11 +276,13 @@ function handleSubmit(e) {
             date: date,
             account: account,
             category: category,
-            desc: desc
+            desc: desc,
+            recurring: recurring,
+            recurringType: recurringType
         };
         transactions.unshift(newTx);
+        if (recurring) generateRecurringTransactions(newTx);
     }
-
     localStorage.setItem('finvault_tx', JSON.stringify(transactions));
     refreshAll();
     if (!document.getElementById('view-transactions').classList.contains('hidden')) {
@@ -275,17 +291,145 @@ function handleSubmit(e) {
     closeModal();
     e.target.reset();
     setFormType('expense');
+    showToast('Transaksi berhasil ditambahkan');
 }
-
+function generateRecurringTransactions(tx) {
+    const interval = { daily:1, weekly:7, monthly:30 }[tx.recurringType];
+    if (!interval) return;
+    const startDate = new Date(tx.date);
+    for (let i=1; i<=12; i++) {
+        const nextDate = new Date(startDate);
+        nextDate.setDate(startDate.getDate() + interval * i);
+        if (nextDate > new Date(new Date().setMonth(new Date().getMonth()+6))) break;
+        const newTx = { ...tx, id: Date.now()+i, date: nextDate.toISOString().split('T')[0] };
+        transactions.push(newTx);
+    }
+}
 function deleteTx(id) {
     if (confirm('Hapus transaksi ini?')) {
         transactions = transactions.filter(t => t.id !== id);
         localStorage.setItem('finvault_tx', JSON.stringify(transactions));
         refreshAll();
         renderFullTransactions();
+        showToast('Transaksi dihapus');
     }
 }
-
+function renderReminders() {
+    const container = document.getElementById('reminder-list');
+    if (!container) return;
+    const today = new Date().toISOString().split('T')[0];
+    reminders.sort((a,b) => a.date.localeCompare(b.date));
+    container.innerHTML = reminders.map(r => {
+        const overdue = r.date < today ? 'text-rose-600' : '';
+        return `
+        <div class="glass bg-white/40 dark:bg-dark-surface/40 p-4 rounded-2xl border border-slate-200/30 dark:border-dark-border/50 hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h4 class="font-bold text-sm md:text-base text-slate-700 dark:text-slate-300">${r.title}</h4>
+                    <p class="text-[10px] md:text-xs text-slate-400 mt-1">${r.date} ${overdue ? '(Terlewat)' : ''}</p>
+                </div>
+                <button onclick="deleteReminder(${r.id})" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can text-xs"></i></button>
+            </div>
+            ${r.amount ? `<p class="text-xs md:text-sm font-bold mt-2">${formatIDR(r.amount)}</p>` : ''}
+            ${r.desc ? `<p class="text-[9px] md:text-xs text-slate-400 mt-1">${r.desc}</p>` : ''}
+        </div>`;
+    }).join('');
+    if (reminders.length === 0) container.innerHTML = '<div class="col-span-full text-center text-slate-400 py-4 text-xs md:text-sm">Belum ada pengingat</div>';
+}
+function saveReminder(e) {
+    e.preventDefault();
+    const newReminder = {
+        id: Date.now(),
+        title: document.getElementById('reminder-title').value,
+        amount: parseFloat(document.getElementById('reminder-amount').value) || null,
+        date: document.getElementById('reminder-date').value,
+        desc: document.getElementById('reminder-desc').value
+    };
+    reminders.push(newReminder);
+    localStorage.setItem('finvault_reminders', JSON.stringify(reminders));
+    renderReminders();
+    closeReminderModal();
+    showToast('Pengingat ditambahkan');
+}
+function deleteReminder(id) {
+    reminders = reminders.filter(r => r.id !== id);
+    localStorage.setItem('finvault_reminders', JSON.stringify(reminders));
+    renderReminders();
+    showToast('Pengingat dihapus');
+}
+function renderGoals() {
+    const container = document.getElementById('goal-list');
+    if (!container) return;
+    container.innerHTML = goals.map(g => {
+        const progress = (g.current / g.target) * 100;
+        const deadline = g.deadline ? new Date(g.deadline).toLocaleDateString('id-ID') : 'Tanpa batas';
+        return `
+        <div class="glass bg-white/40 dark:bg-dark-surface/40 p-4 rounded-2xl border border-slate-200/30 dark:border-dark-border/50 hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start">
+                <h4 class="font-bold text-sm md:text-base text-slate-700 dark:text-slate-300">${g.name}</h4>
+                <button onclick="deleteGoal(${g.id})" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can text-xs"></i></button>
+            </div>
+            <div class="mt-2">
+                <div class="flex justify-between text-[9px] md:text-xs font-bold text-slate-400">
+                    <span>${formatIDR(g.current)}</span>
+                    <span>${formatIDR(g.target)}</span>
+                </div>
+                <div class="h-1.5 w-full bg-slate-200/60 dark:bg-dark-border rounded-full overflow-hidden mt-1">
+                    <div class="h-full bg-gradient-to-r from-brand-500 to-brand-400 transition-all duration-700" style="width:${progress}%"></div>
+                </div>
+                <p class="text-[8px] md:text-[9px] text-slate-400 mt-2">Target: ${deadline}</p>
+            </div>
+        </div>`;
+    }).join('');
+    if (goals.length === 0) container.innerHTML = '<div class="col-span-full text-center text-slate-400 py-4 text-xs md:text-sm">Belum ada target</div>';
+}
+function saveGoal(e) {
+    e.preventDefault();
+    const newGoal = {
+        id: Date.now(),
+        name: document.getElementById('goal-name').value,
+        target: parseFloat(document.getElementById('goal-target').value),
+        current: parseFloat(document.getElementById('goal-current').value) || 0,
+        deadline: document.getElementById('goal-deadline').value || null
+    };
+    goals.push(newGoal);
+    localStorage.setItem('finvault_goals', JSON.stringify(goals));
+    renderGoals();
+    closeGoalModal();
+    showToast('Target ditambahkan');
+}
+function deleteGoal(id) {
+    goals = goals.filter(g => g.id !== id);
+    localStorage.setItem('finvault_goals', JSON.stringify(goals));
+    renderGoals();
+    showToast('Target dihapus');
+}
+function setFormType(type) {
+    document.getElementById('f-type').value = type;
+    document.getElementById('type-exp').className = type==='expense'?'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-rose-600 shadow-sm transition-all':'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold text-slate-500 transition-all';
+    document.getElementById('type-inc').className = type==='income'?'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-emerald-600 shadow-sm transition-all':'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold text-slate-500 transition-all';
+    const catSelect = document.getElementById('f-category');
+    catSelect.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
+}
+document.getElementById('f-recurring').addEventListener('change', function(e) {
+    document.getElementById('recurring-options').classList.toggle('hidden', !e.target.checked);
+});
+function openModal() { document.getElementById('tx-modal').classList.remove('hidden'); document.getElementById('tx-modal').classList.add('flex'); document.getElementById('f-date').valueAsDate = new Date(); }
+function closeModal() { document.getElementById('tx-modal').classList.add('hidden'); document.getElementById('tx-modal').classList.remove('flex'); }
+function openReminderModal() { document.getElementById('reminder-modal').classList.remove('hidden'); document.getElementById('reminder-modal').classList.add('flex'); }
+function closeReminderModal() { document.getElementById('reminder-modal').classList.add('hidden'); document.getElementById('reminder-modal').classList.remove('flex'); }
+function openGoalModal() { document.getElementById('goal-modal').classList.remove('hidden'); document.getElementById('goal-modal').classList.add('flex'); }
+function closeGoalModal() { document.getElementById('goal-modal').classList.add('hidden'); document.getElementById('goal-modal').classList.remove('flex'); }
+function formatDateIndo(dateStr) {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const [y, m, d] = dateStr.split('-');
+    return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+function formatMonthIndo(monthStr) {
+    const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const [y, m] = monthStr.split('-');
+    return `${months[parseInt(m)-1]} ${y}`;
+}
 function downloadCSV() {
     const filter = document.getElementById('date-filter').value;
     const filtered = transactions.filter(t => t.date.startsWith(filter));
@@ -293,60 +437,67 @@ function downloadCSV() {
     const exp = filtered.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
     const saldo = inc - exp;
     let csv = 'LAPORAN KEUANGAN BULANAN\n';
-    csv += `Periode,${filter}\n`;
-    csv += `Total Pemasukan,${formatIDR(inc).replace(/Rp/g,'').trim()}\n`;
-    csv += `Total Pengeluaran,${formatIDR(exp).replace(/Rp/g,'').trim()}\n`;
-    csv += `Saldo Bersih,${formatIDR(saldo).replace(/Rp/g,'').trim()}\n\n`;
+    csv += `Periode:,${formatMonthIndo(filter)}\n`;
+    csv += `Total Pemasukan:,${formatIDR(inc).replace(/Rp/g,'').trim()}\n`;
+    csv += `Total Pengeluaran:,${formatIDR(exp).replace(/Rp/g,'').trim()}\n`;
+    csv += `Saldo Bersih:,${formatIDR(saldo).replace(/Rp/g,'').trim()}\n\n`;
     csv += 'Tanggal,Tipe,Kategori,Akun,Deskripsi,Nominal (IDR)\n';
     filtered.forEach(t => {
         let nominal = t.type === 'income' ? t.amount : -t.amount;
-        csv += `${t.date},${t.type},${t.category},${t.account},"${t.desc||''}",${nominal}\n`;
+        let tipe = t.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
+        csv += `${formatDateIndo(t.date)},${tipe},${t.category},${t.account},"${t.desc||''}",${nominal}\n`;
     });
     const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `LapKeuangan_${filter}.csv`;
     a.click();
+    showToast('CSV diekspor');
 }
-
 function downloadPDF() {
     const filter = document.getElementById('date-filter').value;
     const filtered = transactions.filter(t => t.date.startsWith(filter));
     const inc = filtered.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
     const exp = filtered.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
     const saldo = inc - exp;
-
     const doc = new jspdf.jsPDF();
     doc.setFontSize(16);
-    doc.text('Laporan Keuangan', 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Periode: ${filter}`, 14, 30);
-    doc.text(`Total Pemasukan: ${formatIDR(inc)}`, 14, 38);
-    doc.text(`Total Pengeluaran: ${formatIDR(exp)}`, 14, 46);
-    doc.text(`Saldo Bersih: ${formatIDR(saldo)}`, 14, 54);
-
-    const tableData = filtered.map(t => [t.date, t.type, t.category, t.account, t.desc||'-', formatIDR(t.amount)]);
+    doc.setFont('helvetica', 'bold');
+    doc.text('LAPORAN KEUANGAN', 105, 20, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setLineHeightFactor(1.15);
+    let y = 35;
+    doc.text('Periode:', 20, y);
+    doc.text(formatMonthIndo(filter), 70, y);
+    y += 7;
+    doc.text('Total Pemasukan:', 20, y);
+    doc.text(formatIDR(inc), 70, y);
+    y += 7;
+    doc.text('Total Pengeluaran:', 20, y);
+    doc.text(formatIDR(exp), 70, y);
+    y += 7;
+    doc.text('Saldo Bersih:', 20, y);
+    doc.text(formatIDR(saldo), 70, y);
+    y += 10;
+    const tableData = filtered.map(t => [
+        formatDateIndo(t.date),
+        t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+        t.category,
+        t.account,
+        t.desc || '-',
+        formatIDR(t.amount)
+    ]);
     doc.autoTable({
         head: [['Tanggal', 'Tipe', 'Kategori', 'Akun', 'Deskripsi', 'Nominal']],
         body: tableData,
-        startY: 64,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [59, 130, 246] }
+        startY: y,
+        styles: { fontSize: 8, lineHeight: 1.15 },
+        headStyles: { fillColor: [99, 102, 241] }
     });
     doc.save(`LapKeuangan_${filter}.pdf`);
+    showToast('PDF diekspor');
 }
-
-function setFormType(type) {
-    document.getElementById('f-type').value = type;
-    document.getElementById('type-exp').className = type==='expense'?'py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-rose-500 shadow-sm transition-all':'py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-bold text-slate-500 transition-all';
-    document.getElementById('type-inc').className = type==='income'?'py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-emerald-500 shadow-sm transition-all':'py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-bold text-slate-500 transition-all';
-    const catSelect = document.getElementById('f-category');
-    catSelect.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
-}
-
-function openModal() { document.getElementById('tx-modal').classList.remove('hidden'); document.getElementById('tx-modal').classList.add('flex'); document.getElementById('f-date').valueAsDate = new Date(); }
-function closeModal() { document.getElementById('tx-modal').classList.add('hidden'); document.getElementById('tx-modal').classList.remove('flex'); }
-
 window.onload = () => {
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
     const today = new Date();
@@ -354,6 +505,7 @@ window.onload = () => {
     document.getElementById('date-filter').value = yearMonth;
     updateDateLabel();
     setFormType('expense');
+    updateGreeting();
     if (isSidebarCollapsed && window.innerWidth >= 1024) {
         document.getElementById('sidebar').classList.add('sidebar-collapsed');
         document.getElementById('main-content').style.marginLeft = '5rem';
@@ -362,7 +514,6 @@ window.onload = () => {
     document.getElementById('current-year').innerText = new Date().getFullYear();
     refreshAll();
 };
-
 window.addEventListener('resize', function() {
     if (window.innerWidth < 1024) {
         document.getElementById('sidebar').classList.add('-translate-x-full');
@@ -375,4 +526,4 @@ window.addEventListener('resize', function() {
             document.getElementById('main-content').style.marginLeft = '5rem';
         }
     }
-});
+}, { passive: true });
