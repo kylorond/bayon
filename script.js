@@ -56,7 +56,7 @@ function switchTab(tabId) {
     document.getElementById(`view-${tabId}`).classList.remove('hidden');
     const activeBtn = document.getElementById(`nav-${tabId}`);
     if(activeBtn) activeBtn.className = "nav-item-active nav-item w-full flex items-center px-4 py-3 rounded-xl text-brand-600 dark:text-brand-400 font-semibold transition-all gap-4";
-    const titles = { dashboard:'Ringkasan Eksekutif', transactions:'Jurnal Transaksi', budget:'Manajemen Anggaran' };
+    const titles = { dashboard:'Ringkasan', transactions:'Transaksi', budget:'Anggaran' };
     document.getElementById('header-title').innerText = titles[tabId];
     if(tabId==='transactions') renderFullTransactions();
     if(tabId==='budget') renderBudgetSettings();
