@@ -4,12 +4,12 @@ let mainChart = null, donutChart = null;
 let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
 
 const CATEGORIES = {
-    expense: ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Investasi', 'Lainnya'],
+    expense: ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Investasi', 'Tarik Tunai', 'Lainnya'],
     income: ['Gaji', 'Bonus', 'Freelance', 'Hadiah', 'Bunga Bank', 'Lainnya']
 };
 const CATEGORY_ICONS = {
     'Makan & Minum':'fa-utensils','Transportasi':'fa-car','Belanja':'fa-bag-shopping','Tagihan':'fa-bolt','Hiburan':'fa-gamepad','Kesehatan':'fa-heart-pulse',
-    'Pendidikan':'fa-graduation-cap','Investasi':'fa-chart-line','Lainnya':'fa-ellipsis','Gaji':'fa-money-bill-wave','Bonus':'fa-certificate',
+    'Pendidikan':'fa-graduation-cap','Investasi':'fa-chart-line','Tarik Tunai':'fa-hand-holding-dollar','Lainnya':'fa-ellipsis','Gaji':'fa-money-bill-wave','Bonus':'fa-certificate',
     'Freelance':'fa-laptop-code','Hadiah':'fa-gift','Bunga Bank':'fa-building-columns'
 };
 
@@ -223,21 +223,68 @@ function renderFullTransactions() {
 
 function handleSubmit(e) {
     e.preventDefault();
-    const newTx = {
-        id: Date.now(), type: document.getElementById('f-type').value, amount: parseFloat(document.getElementById('f-amount').value),
-        date: document.getElementById('f-date').value, account: document.getElementById('f-account').value,
-        category: document.getElementById('f-category').value, desc: document.getElementById('f-desc').value
-    };
-    transactions.unshift(newTx);
+    const type = document.getElementById('f-type').value;
+    const amount = parseFloat(document.getElementById('f-amount').value);
+    const date = document.getElementById('f-date').value;
+    const account = document.getElementById('f-account').value;
+    const category = document.getElementById('f-category').value;
+    const desc = document.getElementById('f-desc').value;
+
+    if (type === 'expense' && category === 'Tarik Tunai') {
+        if (account === 'Cash') {
+            alert('Tidak dapat melakukan tarik tunai dari akun Cash.');
+            return;
+        }
+        const expenseTx = {
+            id: Date.now(),
+            type: 'expense',
+            amount: amount,
+            date: date,
+            account: account,
+            category: 'Tarik Tunai',
+            desc: 'Tarik Tunai ke Cash'
+        };
+        const incomeTx = {
+            id: Date.now() + 1,
+            type: 'income',
+            amount: amount,
+            date: date,
+            account: 'Cash',
+            category: 'Tarik Tunai',
+            desc: `Tarik Tunai dari ${account}`
+        };
+        transactions.unshift(expenseTx, incomeTx);
+    } else {
+        const newTx = {
+            id: Date.now(),
+            type: type,
+            amount: amount,
+            date: date,
+            account: account,
+            category: category,
+            desc: desc
+        };
+        transactions.unshift(newTx);
+    }
+
     localStorage.setItem('finvault_tx', JSON.stringify(transactions));
     refreshAll();
     if (!document.getElementById('view-transactions').classList.contains('hidden')) {
         renderFullTransactions();
     }
-    closeModal(); e.target.reset(); setFormType('expense');
+    closeModal();
+    e.target.reset();
+    setFormType('expense');
 }
 
-function deleteTx(id) { if(confirm('Hapus transaksi ini?')) { transactions = transactions.filter(t=>t.id!==id); localStorage.setItem('finvault_tx',JSON.stringify(transactions)); refreshAll(); renderFullTransactions(); } }
+function deleteTx(id) {
+    if (confirm('Hapus transaksi ini?')) {
+        transactions = transactions.filter(t => t.id !== id);
+        localStorage.setItem('finvault_tx', JSON.stringify(transactions));
+        refreshAll();
+        renderFullTransactions();
+    }
+}
 
 function downloadCSV() {
     const filter = document.getElementById('date-filter').value;
