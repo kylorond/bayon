@@ -88,9 +88,9 @@
                     <i class="fa-solid fa-sun text-amber-500 hidden dark:block"></i>
                     <i class="fa-solid fa-moon block dark:hidden"></i>
                 </button>
-                <div class="h-9 sm:h-10 px-2 sm:px-4 glass border border-slate-200/50 dark:border-dark-border rounded-xl flex items-center gap-1 sm:gap-2">
+                <div class="relative h-9 sm:h-10 w-9 sm:w-auto px-0 sm:px-4 glass border border-slate-200/50 dark:border-dark-border rounded-xl flex items-center justify-center sm:justify-start">
                     <i class="fa-regular fa-calendar text-slate-400 text-sm"></i>
-                    <input type="month" id="date-filter" onchange="refreshAll()" class="bg-transparent border-none text-xs sm:text-sm font-semibold focus:ring-0 outline-none cursor-pointer w-20 sm:w-auto">
+                    <input type="month" id="date-filter" onchange="refreshAll()" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                 </div>
                 <button onclick="openModal()" class="h-9 sm:h-10 px-3 sm:pl-4 sm:pr-5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl flex items-center gap-1 sm:gap-2 font-bold text-xs sm:text-sm shadow-xl shadow-brand-600/30 transition-all active:scale-95">
                     <i class="fa-solid fa-plus-circle"></i>
