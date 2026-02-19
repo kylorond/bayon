@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manajemen Keuangan by Ron</title>
+    <title>LapKeuangan by Ron</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -17,10 +17,10 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554' },
-                        dark: { bg: '#0f172a', surface: '#1e293b', border: '#334155', accent: '#38bdf8' }
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4b' },
+                        dark: { bg: '#0f172a', surface: '#1e293b', border: '#334155', accent: '#94a3b8' }
                     }
                 }
             }
@@ -28,48 +28,54 @@
     </script>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-[#F1F5F9] dark:bg-dark-bg text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-200 font-sans antialiased transition-colors duration-300">
 
-<div id="mobile-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
+<div id="mobile-overlay" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 hidden lg:hidden" onclick="closeSidebar()"></div>
 
 <div class="flex h-screen overflow-hidden">
-    <aside id="sidebar" class="fixed inset-y-0 left-0 bg-white/80 dark:bg-dark-surface/90 backdrop-blur-xl border-r border-slate-200/70 dark:border-dark-border z-50 flex flex-col transition-all duration-300 ease-out shadow-2xl shadow-slate-200/20 dark:shadow-black/30 w-72 lg:w-72 -translate-x-full lg:translate-x-0">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 bg-white/90 dark:bg-dark-surface/90 backdrop-blur-xl border-r border-slate-200 dark:border-dark-border z-50 flex flex-col transition-all duration-300 ease-out shadow-2xl shadow-slate-200/20 dark:shadow-black/30 w-72 lg:w-72 -translate-x-full lg:translate-x-0">
         <div class="p-6 flex items-center justify-between">
             <div class="flex items-center gap-3 overflow-hidden">
                 <div class="sidebar-logo-text whitespace-nowrap">
-                    <h1 class="text-lg font-extrabold tracking-tight dark:text-white">Manajemen Keuangan<span class="text-brand-500">.</span></h1>
+                    <h1 class="text-lg font-extrabold tracking-tight dark:text-white">LapKeuangan<span class="text-brand-500">.</span></h1>
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">by Ron</span>
                 </div>
             </div>
-            <button id="collapse-icon-parent" onclick="toggleSidebarCollapse()" class="hidden lg:block w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <button id="collapse-icon-parent" onclick="toggleSidebarCollapse()" class="hidden lg:block w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border transition-all">
                 <i id="collapse-icon" class="fa-solid fa-chevron-left text-sm"></i>
             </button>
         </div>
 
         <nav class="flex-1 px-4 space-y-1 overflow-y-auto">
             <p class="sidebar-user-text px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">utama</p>
-            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item-active nav-item w-full flex items-center px-4 py-3 rounded-xl text-brand-600 dark:text-brand-400 font-semibold transition-all gap-4">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item-active nav-item w-full flex items-center px-4 py-3 rounded-2xl text-brand-600 dark:text-brand-400 font-semibold transition-all gap-4">
                 <i class="fa-solid fa-chart-pie w-6 text-lg"></i><span class="nav-text">Dashboard</span>
             </button>
-            <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-item w-full flex items-center px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 font-medium transition-all gap-4">
+            <button onclick="switchTab('transactions')" id="nav-transactions" class="nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4">
                 <i class="fa-solid fa-receipt w-6 text-lg"></i><span class="nav-text">Transaksi</span>
             </button>
-            <button onclick="switchTab('budget')" id="nav-budget" class="nav-item w-full flex items-center px-4 py-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 font-medium transition-all gap-4">
+            <button onclick="switchTab('budget')" id="nav-budget" class="nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4">
                 <i class="fa-solid fa-wallet w-6 text-lg"></i><span class="nav-text">Anggaran</span>
             </button>
+            <button onclick="switchTab('reminders')" id="nav-reminders" class="nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4">
+                <i class="fa-solid fa-bell w-6 text-lg"></i><span class="nav-text">Pengingat</span>
+            </button>
+            <button onclick="switchTab('goals')" id="nav-goals" class="nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4">
+                <i class="fa-solid fa-flag-checkered w-6 text-lg"></i><span class="nav-text">Target</span>
+            </button>
             <p class="sidebar-user-text px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-8 mb-4">laporan</p>
-            <button onclick="downloadCSV()" class="nav-item w-full flex items-center px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 font-medium transition-all gap-4">
+            <button onclick="downloadCSV()" class="nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4">
                 <i class="fa-solid fa-file-export w-6 text-lg"></i><span class="nav-text">Ekspor CSV</span>
             </button>
-            <button onclick="downloadPDF()" class="nav-item w-full flex items-center px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/50 font-medium transition-all gap-4">
+            <button onclick="downloadPDF()" class="nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4">
                 <i class="fa-solid fa-file-pdf w-6 text-lg"></i><span class="nav-text">Cetak PDF</span>
             </button>
         </nav>
 
         <div class="p-5 sidebar-balance">
-            <div class="bg-gradient-to-br from-brand-600 to-brand-800 p-5 rounded-2xl shadow-xl shadow-brand-500/30 text-white overflow-hidden relative">
+            <div class="bg-gradient-to-br from-brand-600 to-brand-800 p-5 rounded-3xl shadow-xl shadow-brand-500/30 text-white overflow-hidden relative">
                 <div class="absolute -right-4 -bottom-4 opacity-20 rotate-12">
-                    <i class="fa-solid fa-money-check-dollar"></i>
+                    <i class="fa-solid fa-chart-line text-7xl"></i>
                 </div>
                 <p class="text-[10px] font-medium opacity-80 mb-1">Total Saldo</p>
                 <p class="text-base md:text-xl font-extrabold tracking-tight mb-3 break-words" id="sidebar-balance">Rp 0</p>
@@ -83,22 +89,25 @@
     <main id="main-content" class="flex-1 flex flex-col min-w-0 transition-all duration-300 lg:ml-72">
         <header class="min-h-[5rem] glass sticky top-0 z-30 border-b border-slate-200/60 dark:border-dark-border/60 px-4 sm:px-8 py-2 flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-2 sm:gap-4">
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl">
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-dark-border rounded-xl">
                     <i class="fa-solid fa-bars-staggered text-xl"></i>
                 </button>
-                <h2 class="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent" id="header-title">Ringkasan</h2>
+                <div>
+                    <h2 class="text-lg sm:text-xl font-bold tracking-tight bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent" id="header-title">Ringkasan</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" id="greeting"></p>
+                </div>
             </div>
             <div class="flex items-center gap-2 sm:gap-3">
-                <button onclick="toggleTheme()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center glass border border-slate-200/50 dark:border-dark-border text-slate-500 hover:border-brand-400 transition-all">
+                <button onclick="toggleTheme()" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center glass border border-slate-200/50 dark:border-dark-border text-slate-500 hover:border-brand-400 transition-all">
                     <i class="fa-solid fa-sun text-amber-500 hidden dark:block"></i>
                     <i class="fa-solid fa-moon block dark:hidden"></i>
                 </button>
-                <div onclick="document.getElementById('date-filter').showPicker()" class="relative h-9 sm:h-10 w-9 sm:w-36 glass border border-slate-200/50 dark:border-dark-border rounded-xl flex items-center justify-center sm:justify-start gap-1 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all">
+                <div onclick="document.getElementById('date-filter').showPicker()" class="relative h-9 sm:h-10 w-9 sm:w-36 glass border border-slate-200/50 dark:border-dark-border rounded-full flex items-center justify-center sm:justify-start gap-1 cursor-pointer hover:bg-slate-100 dark:hover:bg-dark-border/50 transition-all">
                     <i class="fa-regular fa-calendar text-slate-400 text-sm ml-0 sm:ml-3"></i>
                     <span class="hidden sm:inline text-xs font-medium text-slate-600 dark:text-slate-300" id="date-label"></span>
                     <input type="month" id="date-filter" onchange="updateDateLabel(); refreshAll()" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
                 </div>
-                <button onclick="openModal()" class="h-9 sm:h-10 px-3 sm:pl-4 sm:pr-5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl flex items-center gap-1 sm:gap-2 font-bold text-xs sm:text-sm shadow-xl shadow-brand-600/30 transition-all active:scale-95">
+                <button onclick="openModal()" class="h-9 sm:h-10 px-3 sm:pl-4 sm:pr-5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-full flex items-center gap-1 sm:gap-2 font-bold text-xs sm:text-sm shadow-xl shadow-brand-600/30 transition-all active:scale-95">
                     <i class="fa-solid fa-plus-circle"></i>
                     <span class="hidden sm:inline">Transaksi</span>
                 </button>
@@ -108,48 +117,48 @@
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8" id="content-area">
             <div id="view-dashboard" class="animate-fade space-y-6 md:space-y-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                    <div class="glass p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-emerald-100/70 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xl md:text-2xl">
+                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-emerald-100/70 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xl md:text-2xl">
                             <i class="fa-solid fa-arrow-trend-up"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Pemasukan</p>
-                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white break-words" id="stat-income">Rp 0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-income">Rp 0</h4>
                         </div>
                     </div>
-                    <div class="glass p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-rose-100/70 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 text-xl md:text-2xl">
+                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-rose-100/70 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 text-xl md:text-2xl">
                             <i class="fa-solid fa-arrow-trend-down"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Pengeluaran</p>
-                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white break-words" id="stat-expense">Rp 0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-expense">Rp 0</h4>
                         </div>
                     </div>
-                    <div class="glass p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-brand-100/70 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 text-xl md:text-2xl">
+                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-brand-100/70 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 text-xl md:text-2xl">
                             <i class="fa-solid fa-piggy-bank"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Tabungan</p>
-                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white break-words" id="stat-savings">Rp 0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-savings">Rp 0</h4>
                         </div>
                     </div>
-                    <div class="glass p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-purple-100/70 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xl md:text-2xl">
+                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-purple-100/70 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xl md:text-2xl">
                             <i class="fa-solid fa-credit-card"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Transaksi</p>
-                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-900 dark:text-white break-words" id="stat-count">0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-count">0</h4>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-                    <div class="lg:col-span-2 glass p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
+                    <div class="lg:col-span-2 glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-base md:text-lg font-extrabold tracking-tight">Arus Kas 30 Hari</h3>
+                            <h3 class="text-base md:text-lg font-extrabold tracking-tight text-slate-700 dark:text-slate-300">Arus Kas 30 Hari</h3>
                             <div class="flex gap-2 md:gap-3">
                                 <span class="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-500/20 px-2 md:px-3 py-1 md:py-1.5 rounded-full">
                                     <div class="w-2 h-2 rounded-full bg-emerald-500"></div> Masuk
@@ -164,26 +173,26 @@
                         </div>
                     </div>
 
-                    <div class="glass p-5 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl flex flex-col hover:shadow-lg transition-shadow">
-                        <h3 class="text-base md:text-lg font-extrabold tracking-tight mb-4">Distribusi Biaya</h3>
+                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl flex flex-col hover:shadow-lg transition-shadow">
+                        <h3 class="text-base md:text-lg font-extrabold tracking-tight text-slate-700 dark:text-slate-300 mb-4">Distribusi Pengeluaran</h3>
                         <div class="flex flex-col items-center justify-center flex-1">
                             <div class="relative w-full max-w-[180px] md:max-w-[220px] mx-auto">
                                 <canvas id="donutChart" class="w-full h-auto chart-glow"></canvas>
                                 <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
                                     <span class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider">terpakai</span>
-                                    <span class="text-xl md:text-2xl font-black text-slate-900 dark:text-white" id="budget-percentage">0%</span>
+                                    <span class="text-xl md:text-2xl font-black text-slate-800 dark:text-white" id="budget-percentage">0%</span>
                                     <span class="text-[8px] md:text-[9px] font-medium text-slate-400 mt-1">dari budget</span>
                                 </div>
                             </div>
-                            <div id="chart-legend" class="w-full mt-4 md:mt-6 space-y-1 md:space-y-2 text-xs md:text-sm"></div>
+                            <div id="chart-legend" class="w-full mt-4 md:mt-6 space-y-1 md:space-y-2 text-xs md:text-sm text-slate-600 dark:text-slate-400"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                    <div class="glass rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="glass rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl overflow-hidden hover:shadow-lg transition-shadow">
                         <div class="p-4 md:p-6 border-b border-slate-200/40 dark:border-dark-border flex justify-between items-center">
-                            <h3 class="text-base md:text-lg font-extrabold">Transaksi Terbaru</h3>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-700 dark:text-slate-300">Transaksi Terbaru</h3>
                             <button onclick="switchTab('transactions')" class="text-[10px] md:text-xs font-bold text-brand-600 hover:underline flex items-center gap-1">Lihat Semua <i class="fa-solid fa-arrow-right text-[8px] md:text-[10px]"></i></button>
                         </div>
                         <div class="overflow-x-auto">
@@ -193,36 +202,36 @@
                         </div>
                     </div>
 
-                    <div class="glass p-4 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
+                    <div class="glass p-4 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-base md:text-lg font-extrabold">Monitor Anggaran</h3>
+                            <h3 class="text-base md:text-lg font-extrabold text-slate-700 dark:text-slate-300">Monitor Anggaran</h3>
                             <button onclick="switchTab('budget')" class="p-1.5 md:p-2 text-slate-400 hover:text-brand-500 transition-all">
                                 <i class="fa-solid fa-sliders"></i>
                             </button>
                         </div>
-                        <div id="budget-progress-list" class="space-y-4 md:space-y-5 max-h-[280px] md:max-h-[320px] overflow-y-auto pr-1 md:pr-2"></div>
+                        <div id="budget-progress-list" class="space-y-4 md:space-y-5 max-h-[280px] md:max-h-[320px] overflow-y-auto pr-1 md:pr-2 text-slate-600 dark:text-slate-400"></div>
                     </div>
                 </div>
 
-                <div class="glass p-4 md:p-6 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
-                    <h3 class="text-base md:text-lg font-extrabold mb-4 md:mb-6">Saldo per Akun</h3>
+                <div class="glass p-4 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
+                    <h3 class="text-base md:text-lg font-extrabold text-slate-700 dark:text-slate-300 mb-4 md:mb-6">Saldo per Akun</h3>
                     <div id="account-balance-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4"></div>
                 </div>
             </div>
 
             <div id="view-transactions" class="hidden animate-fade">
-                <div class="glass rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl overflow-hidden">
+                <div class="glass rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl overflow-hidden">
                     <div class="p-4 md:p-6 border-b border-slate-200/40 dark:border-dark-border flex flex-col sm:flex-row justify-between gap-3 md:gap-4">
                         <div>
-                            <h3 class="text-lg md:text-xl font-extrabold mb-1">Jurnal Transaksi</h3>
+                            <h3 class="text-lg md:text-xl font-extrabold text-slate-700 dark:text-slate-300 mb-1">Jurnal Transaksi</h3>
                             <p class="text-[10px] md:text-xs text-slate-400 font-medium">Kelola riwayat keuangan Anda</p>
                         </div>
                         <div class="flex flex-col xs:flex-row gap-2 w-full sm:w-auto">
                             <div class="relative flex-1 sm:flex-initial">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm z-10"></i>
-                                <input type="text" id="tx-search" oninput="renderFullTransactions()" placeholder="Cari transaksi..." class="w-full sm:w-56 md:w-64 pl-9 pr-4 py-2 bg-white/60 dark:bg-slate-800/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                <input type="text" id="tx-search" placeholder="Cari transaksi..." class="w-full sm:w-56 md:w-64 pl-9 pr-4 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
                             </div>
-                            <select id="tx-type-filter" onchange="renderFullTransactions()" class="px-3 md:px-4 py-2 bg-white/60 dark:bg-slate-800/60 border-none rounded-xl text-xs md:text-sm outline-none font-bold cursor-pointer">
+                            <select id="tx-type-filter" onchange="renderFullTransactions()" class="px-3 md:px-4 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer text-slate-600 dark:text-slate-400">
                                 <option value="all">Semua tipe</option>
                                 <option value="income">Pemasukan</option>
                                 <option value="expense">Pengeluaran</option>
@@ -231,7 +240,7 @@
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left">
-                            <thead class="bg-slate-100/50 dark:bg-slate-800/50 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            <thead class="bg-slate-100/50 dark:bg-dark-surface/50 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
                                 <tr>
                                     <th class="px-4 md:px-6 py-3 md:py-4">Info</th>
                                     <th class="px-4 md:px-6 py-3 md:py-4">Kategori</th>
@@ -240,58 +249,88 @@
                                     <th class="px-4 md:px-6 py-3 md:py-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="full-tx-body" class="divide-y divide-slate-200/30 dark:divide-dark-border text-xs md:text-sm"></tbody>
+                            <tbody id="full-tx-body" class="divide-y divide-slate-200/30 dark:divide-dark-border text-xs md:text-sm text-slate-600 dark:text-slate-400"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <div id="view-budget" class="hidden animate-fade max-w-3xl mx-auto">
-                <div class="glass p-5 md:p-8 rounded-2xl md:rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl">
-                    <h3 class="text-xl md:text-2xl font-extrabold mb-2">Target Anggaran</h3>
+                <div class="glass p-5 md:p-8 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl">
+                    <h3 class="text-xl md:text-2xl font-extrabold text-slate-700 dark:text-slate-300 mb-2">Target Anggaran</h3>
                     <p class="text-slate-400 text-xs md:text-sm mb-6 md:mb-8 font-medium">Atur batas pengeluaran bulanan per kategori.</p>
                     <form onsubmit="saveBudgets(event)" class="space-y-5 md:space-y-6">
                         <div id="budget-input-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"></div>
-                        <button type="submit" class="w-full py-3 md:py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-xl md:rounded-2xl font-bold shadow-lg md:shadow-xl shadow-brand-600/30 hover:from-brand-700 hover:to-brand-600 transition-all active:scale-[0.98] text-sm md:text-base">
+                        <button type="submit" class="w-full py-3 md:py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl md:rounded-3xl font-bold shadow-lg md:shadow-xl shadow-brand-600/30 hover:from-brand-700 hover:to-brand-600 transition-all active:scale-[0.98] text-sm md:text-base">
                             Perbarui Target
                         </button>
                     </form>
                 </div>
             </div>
 
+            <div id="view-reminders" class="hidden animate-fade max-w-4xl mx-auto">
+                <div class="glass rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl overflow-hidden">
+                    <div class="p-4 md:p-6 border-b border-slate-200/40 dark:border-dark-border flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-extrabold text-slate-700 dark:text-slate-300 mb-1">Pengingat</h3>
+                            <p class="text-[10px] md:text-xs text-slate-400 font-medium">Atur pengingat tagihan atau cicilan</p>
+                        </div>
+                        <button onclick="openReminderModal()" class="h-8 sm:h-9 px-3 sm:px-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-full flex items-center gap-1 text-xs sm:text-sm font-bold shadow-md hover:from-brand-700 hover:to-brand-600 transition-all">
+                            <i class="fa-solid fa-plus-circle"></i> <span class="hidden sm:inline">Tambah</span>
+                        </button>
+                    </div>
+                    <div id="reminder-list" class="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"></div>
+                </div>
+            </div>
+
+            <div id="view-goals" class="hidden animate-fade max-w-4xl mx-auto">
+                <div class="glass rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl overflow-hidden">
+                    <div class="p-4 md:p-6 border-b border-slate-200/40 dark:border-dark-border flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg md:text-xl font-extrabold text-slate-700 dark:text-slate-300 mb-1">Target Keuangan</h3>
+                            <p class="text-[10px] md:text-xs text-slate-400 font-medium">Wujudkan impian finansialmu</p>
+                        </div>
+                        <button onclick="openGoalModal()" class="h-8 sm:h-9 px-3 sm:px-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-full flex items-center gap-1 text-xs sm:text-sm font-bold shadow-md hover:from-brand-700 hover:to-brand-600 transition-all">
+                            <i class="fa-solid fa-plus-circle"></i> <span class="hidden sm:inline">Tambah</span>
+                        </button>
+                    </div>
+                    <div id="goal-list" class="p-4 md:p-6 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"></div>
+                </div>
+            </div>
+
             <footer class="text-center text-slate-400 text-[10px] md:text-xs py-4 md:py-6 border-t border-slate-200/30 dark:border-dark-border/50 mt-6 md:mt-12">
-                © <span id="current-year"></span> <a href="https://www.instagram.com/baronnnd_" target="_blank">Baron.</a> All rights reserved.
+                © <span id="current-year"></span> <a href="https://www.instagram.com/baronnnd_" target="_blank" class="hover:text-brand-500">Baron.</a> All rights reserved.
             </footer>
         </div>
     </main>
 </div>
 
 <div id="tx-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
-    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeModal()"></div>
-    <div class="glass w-full max-w-lg rounded-2xl md:rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-white/20 dark:border-dark-border">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-md" onclick="closeModal()"></div>
+    <div class="glass w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-white/20 dark:border-dark-border">
         <div class="p-4 md:p-6 border-b border-slate-200/30 dark:border-dark-border flex justify-between items-center">
-            <h3 class="text-lg md:text-xl font-extrabold">Transaksi Baru</h3>
+            <h3 class="text-lg md:text-xl font-extrabold text-slate-700 dark:text-slate-300">Transaksi Baru</h3>
             <button onclick="closeModal()" class="text-slate-400 hover:text-rose-500 transition-all"><i class="fa-solid fa-circle-xmark text-xl md:text-2xl"></i></button>
         </div>
         <form onsubmit="handleSubmit(event)" class="p-4 md:p-6 space-y-4 md:space-y-5">
-            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-200/40 dark:bg-slate-800/60 rounded-xl md:rounded-2xl">
-                <button type="button" id="type-exp" onclick="setFormType('expense')" class="py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-rose-500 shadow-sm transition-all">Pengeluaran</button>
-                <button type="button" id="type-inc" onclick="setFormType('income')" class="py-2 md:py-3 rounded-lg md:rounded-xl text-xs md:text-sm font-bold text-slate-500 transition-all">Pemasukan</button>
+            <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100/40 dark:bg-dark-surface/60 rounded-2xl md:rounded-3xl">
+                <button type="button" id="type-exp" onclick="setFormType('expense')" class="py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-rose-600 shadow-sm transition-all">Pengeluaran</button>
+                <button type="button" id="type-inc" onclick="setFormType('income')" class="py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold text-slate-500 transition-all">Pemasukan</button>
             </div>
             <input type="hidden" id="f-type" value="expense">
             <div class="space-y-3 md:space-y-4">
                 <div class="relative">
                     <span class="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm md:text-base">Rp</span>
-                    <input type="number" id="f-amount" placeholder="0" required class="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-3 md:py-4 bg-white/60 dark:bg-slate-800/60 border-none rounded-xl md:rounded-2xl font-black text-lg md:text-2xl focus:ring-2 focus:ring-brand-500 outline-none">
+                    <input type="number" id="f-amount" placeholder="0" required class="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-3 md:py-4 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl md:rounded-3xl font-black text-lg md:text-2xl focus:ring-2 focus:ring-brand-500 outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
                         <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Tanggal</label>
-                        <input type="date" id="f-date" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-slate-800/60 border-none rounded-lg md:rounded-xl text-xs md:text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
+                        <input type="date" id="f-date" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl md:rounded-2xl text-xs md:text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
                     </div>
                     <div>
                         <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Akun</label>
-                        <input type="text" id="f-account" list="account-suggestions" placeholder="Pilih akun" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-slate-800/60 border-none rounded-lg md:rounded-xl text-xs md:text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
+                        <input type="text" id="f-account" list="account-suggestions" placeholder="Pilih akun" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl md:rounded-2xl text-xs md:text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none">
                         <datalist id="account-suggestions">
                             <option value="Cash">
                             <option value="BCA">
@@ -310,17 +349,88 @@
                 </div>
                 <div>
                     <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Kategori</label>
-                    <select id="f-category" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-slate-800/60 border-none rounded-lg md:rounded-xl text-xs md:text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none"></select>
+                    <select id="f-category" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl md:rounded-2xl text-xs md:text-sm font-semibold focus:ring-2 focus:ring-brand-500 outline-none"></select>
                 </div>
                 <div>
                     <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Deskripsi</label>
-                    <textarea id="f-desc" rows="2" placeholder="Contoh: Makan siang" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-slate-800/60 border-none rounded-lg md:rounded-xl text-xs md:text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none resize-none"></textarea>
+                    <textarea id="f-desc" rows="2" placeholder="Contoh: Makan siang" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl md:rounded-2xl text-xs md:text-sm font-medium focus:ring-2 focus:ring-brand-500 outline-none resize-none"></textarea>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="f-recurring" class="rounded text-brand-500 focus:ring-brand-500">
+                    <label for="f-recurring" class="text-xs md:text-sm text-slate-600 dark:text-slate-400">Ulangi transaksi ini</label>
+                </div>
+                <div id="recurring-options" class="hidden space-y-2 pl-6">
+                    <select id="f-recurring-type" class="w-full px-2 md:px-3 py-1 md:py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm outline-none">
+                        <option value="daily">Setiap hari</option>
+                        <option value="weekly">Setiap minggu</option>
+                        <option value="monthly">Setiap bulan</option>
+                    </select>
                 </div>
             </div>
-            <button type="submit" class="w-full py-3 md:py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-xl md:rounded-2xl font-black text-base md:text-lg shadow-lg md:shadow-xl shadow-brand-600/30 transition-all hover:from-brand-700 hover:to-brand-600 active:scale-95">Konfirmasi</button>
+            <button type="submit" class="w-full py-3 md:py-4 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl md:rounded-3xl font-black text-base md:text-lg shadow-lg md:shadow-xl shadow-brand-600/30 transition-all hover:from-brand-700 hover:to-brand-600 active:scale-95">Konfirmasi</button>
         </form>
     </div>
 </div>
+
+<div id="reminder-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-md" onclick="closeReminderModal()"></div>
+    <div class="glass w-full max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-white/20 dark:border-dark-border">
+        <div class="p-4 md:p-6 border-b border-slate-200/30 dark:border-dark-border flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-extrabold text-slate-700 dark:text-slate-300">Pengingat Baru</h3>
+            <button onclick="closeReminderModal()" class="text-slate-400 hover:text-rose-500 transition-all"><i class="fa-solid fa-circle-xmark text-xl md:text-2xl"></i></button>
+        </div>
+        <form onsubmit="saveReminder(event)" class="p-4 md:p-6 space-y-4">
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Judul</label>
+                <input type="text" id="reminder-title" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            </div>
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Jumlah (Rp)</label>
+                <input type="number" id="reminder-amount" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            </div>
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Tanggal Jatuh Tempo</label>
+                <input type="date" id="reminder-date" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            </div>
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Keterangan</label>
+                <textarea id="reminder-desc" rows="2" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none"></textarea>
+            </div>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-600/30 hover:from-brand-700 hover:to-brand-600 transition-all">Simpan</button>
+        </form>
+    </div>
+</div>
+
+<div id="goal-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-md" onclick="closeGoalModal()"></div>
+    <div class="glass w-full max-w-md rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-white/20 dark:border-dark-border">
+        <div class="p-4 md:p-6 border-b border-slate-200/30 dark:border-dark-border flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-extrabold text-slate-700 dark:text-slate-300">Target Baru</h3>
+            <button onclick="closeGoalModal()" class="text-slate-400 hover:text-rose-500 transition-all"><i class="fa-solid fa-circle-xmark text-xl md:text-2xl"></i></button>
+        </div>
+        <form onsubmit="saveGoal(event)" class="p-4 md:p-6 space-y-4">
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Nama Target</label>
+                <input type="text" id="goal-name" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            </div>
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Target Nominal (Rp)</label>
+                <input type="number" id="goal-target" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            </div>
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Terkumpul Saat Ini (Rp)</label>
+                <input type="number" id="goal-current" value="0" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            </div>
+            <div>
+                <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Batas Waktu</label>
+                <input type="date" id="goal-deadline" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+            </div>
+            <button type="submit" class="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-600/30 hover:from-brand-700 hover:to-brand-600 transition-all">Simpan</button>
+        </form>
+    </div>
+</div>
+
+<div id="toast" class="fixed bottom-4 right-4 z-50 transform transition-all duration-300 translate-y-2 opacity-0 invisible"></div>
 
 <script src="script.js"></script>
 </body>
