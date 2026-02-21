@@ -1,8 +1,8 @@
-.glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-.dark .glass { background: rgba(30, 41, 59, 0.7); }
+.glass { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05); }
+.dark .glass { background: rgba(30, 41, 59, 0.7); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2); }
 .card-gradient { background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); }
 .dark .card-gradient { background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); }
-.nav-item-active { background: linear-gradient(90deg, rgba(99,102,241,0.12) 0%, rgba(99,102,241,0) 100%); border-left: 4px solid #6366f1; }
+.nav-item-active { background: linear-gradient(90deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0) 100%); border-left: 4px solid #6366f1; }
 @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-4px); } 100% { transform: translateY(0px); } }
 .animate-float { animation: float 3s ease-in-out infinite; }
 .transition-width { transition-property: width, padding; transition-duration: 300ms; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
@@ -14,36 +14,34 @@
 .sidebar-collapsed .nav-item { justify-content: center; padding-left: 0; padding-right: 0; }
 .sidebar-collapsed .nav-item i { margin-right: 0; }
 .chart-glow { filter: drop-shadow(0 8px 16px rgba(99,102,241,0.15)); }
+#toast { min-width: 200px; max-width: 300px; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 9999px; padding: 0.75rem 1.5rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); border: 1px solid rgba(203, 213, 225, 0.3); color: #1e293b; font-weight: 600; text-align: center; }
+.dark #toast { background: rgba(30, 41, 59, 0.9); color: #e2e8f0; border-color: #334155; }
+@keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fade { animation: fade 0.3s ease-out; }
+
+html { font-size: 13px; }
+@media (min-width: 640px) { html { font-size: 13.5px; } }
+@media (min-width: 768px) { html { font-size: 14px; } }
+@media (min-width: 1024px) { html { font-size: 11px; } }
+@media (min-width: 1280px) { html { font-size: 12px; } }
+@media (min-width: 1536px) { html { font-size: 13px; } }
+
+body { background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.03) 0%, transparent 30%); }
+.dark body { background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 30%); }
+
+input, select, textarea, button { transition: all 0.2s ease; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; ring: 2px solid #6366f1; }
+
 @media (max-width: 1023px) {
     #sidebar { width: 18rem !important; }
     #main-content { margin-left: 0 !important; }
     #collapse-icon-parent { display: none; }
 }
-#toast {
-    min-width: 200px;
-    max-width: 300px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    border-radius: 9999px;
-    padding: 0.75rem 1.5rem;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(203, 213, 225, 0.3);
-    color: #1e293b;
-    font-weight: 600;
-    text-align: center;
-}
-.dark #toast {
-    background: rgba(30, 41, 59, 0.9);
-    color: #e2e8f0;
-    border-color: #334155;
-}
-.scrollbar-thin::-webkit-scrollbar {
-    height: 4px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-.dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #475569;
-}
+
+#sidebar { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.dark #sidebar { background: rgba(30, 41, 59, 0.85); }
+
+.glass:hover { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08); transform: translateY(-2px); transition: all 0.3s ease; }
+.dark .glass:hover { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3); }
+
+.nav-item-active { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1); }
