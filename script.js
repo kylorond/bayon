@@ -6,12 +6,12 @@ let mainChart = null, donutChart = null;
 let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
 let searchTimeout;
 const CATEGORIES = {
-    expense: ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Investasi', 'Tarik Tunai', 'Lainnya'],
+    expense: ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Investasi', 'Tarik Tunai', 'Top Up E-Wallet', 'Lainnya'],
     income: ['Gaji', 'Bonus', 'Freelance', 'Hadiah', 'Bunga Bank', 'Lainnya']
 };
 const CATEGORY_ICONS = {
     'Makan & Minum':'fa-utensils','Transportasi':'fa-car','Belanja':'fa-bag-shopping','Tagihan':'fa-bolt','Hiburan':'fa-gamepad','Kesehatan':'fa-heart-pulse',
-    'Pendidikan':'fa-graduation-cap','Investasi':'fa-chart-line','Tarik Tunai':'fa-hand-holding-dollar','Lainnya':'fa-ellipsis','Gaji':'fa-money-bill-wave','Bonus':'fa-certificate',
+    'Pendidikan':'fa-graduation-cap','Investasi':'fa-chart-line','Tarik Tunai':'fa-hand-holding-dollar','Top Up E-Wallet':'fa-wallet','Lainnya':'fa-ellipsis','Gaji':'fa-money-bill-wave','Bonus':'fa-certificate',
     'Freelance':'fa-laptop-code','Hadiah':'fa-gift','Bunga Bank':'fa-building-columns'
 };
 function formatIDR(num) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num); }
@@ -103,7 +103,7 @@ function renderAccountBalances() {
             </div>
             <div class="min-w-0 flex-1">
                 <p class="text-[9px] md:text-xs font-bold text-slate-400 uppercase truncate">${acc}</p>
-                <p class="text-sm md:text-base font-black break-words ${bal >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(bal)}</p>
+                <p class="text-xs max-[500px]:text-[0.65rem] sm:text-sm md:text-base font-black whitespace-nowrap overflow-x-auto scrollbar-thin ${bal >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(bal)}</p>
             </div>
         </div>
     `).join('');
@@ -266,6 +266,30 @@ function handleSubmit(e) {
             account: 'Cash',
             category: 'Tarik Tunai',
             desc: `Tarik Tunai dari ${account}`
+        };
+        transactions.unshift(expenseTx, incomeTx);
+    } else if (type === 'expense' && category === 'Top Up E-Wallet') {
+        if (account === 'E-Wallet') {
+            alert('Tidak dapat melakukan top up dari akun E-Wallet.');
+            return;
+        }
+        const expenseTx = {
+            id: Date.now(),
+            type: 'expense',
+            amount: amount,
+            date: date,
+            account: account,
+            category: 'Top Up E-Wallet',
+            desc: `Top Up ke E-Wallet`
+        };
+        const incomeTx = {
+            id: Date.now() + 1,
+            type: 'income',
+            amount: amount,
+            date: date,
+            account: 'E-Wallet',
+            category: 'Top Up E-Wallet',
+            desc: `Top Up dari ${account}`
         };
         transactions.unshift(expenseTx, incomeTx);
     } else {
