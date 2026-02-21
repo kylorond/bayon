@@ -5,17 +5,20 @@ let goals = JSON.parse(localStorage.getItem('finvault_goals')) || [];
 let mainChart = null, donutChart = null;
 let isSidebarCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
 let searchTimeout;
+
 const CATEGORIES = {
     expense: ['Makan & Minum', 'Transportasi', 'Belanja', 'Tagihan', 'Hiburan', 'Kesehatan', 'Pendidikan', 'Investasi', 'Tarik Tunai', 'Top Up E-Wallet', 'Lainnya'],
     income: ['Gaji', 'Bonus', 'Freelance', 'Hadiah', 'Bunga Bank', 'Lainnya']
 };
 const CATEGORY_ICONS = {
     'Makan & Minum':'fa-utensils','Transportasi':'fa-car','Belanja':'fa-bag-shopping','Tagihan':'fa-bolt','Hiburan':'fa-gamepad','Kesehatan':'fa-heart-pulse',
-    'Pendidikan':'fa-graduation-cap','Investasi':'fa-chart-line','Tarik Tunai':'fa-hand-holding-dollar','Top Up E-Wallet':'fa-wallet','Lainnya':'fa-ellipsis','Gaji':'fa-money-bill-wave','Bonus':'fa-certificate',
-    'Freelance':'fa-laptop-code','Hadiah':'fa-gift','Bunga Bank':'fa-building-columns'
+    'Pendidikan':'fa-graduation-cap','Investasi':'fa-chart-line','Tarik Tunai':'fa-hand-holding-dollar','Top Up E-Wallet':'fa-wallet','Lainnya':'fa-ellipsis',
+    'Gaji':'fa-money-bill-wave','Bonus':'fa-certificate','Freelance':'fa-laptop-code','Hadiah':'fa-gift','Bunga Bank':'fa-building-columns'
 };
-function formatIDR(num) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num); }
-function showToast(message, duration = 3000) {
+
+const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num);
+
+const showToast = (message, duration = 3000) => {
     const toast = document.getElementById('toast');
     toast.textContent = message;
     toast.classList.remove('invisible', 'opacity-0', 'translate-y-2');
@@ -24,18 +27,20 @@ function showToast(message, duration = 3000) {
         toast.classList.add('invisible', 'opacity-0', 'translate-y-2');
         toast.classList.remove('opacity-100', 'translate-y-0');
     }, duration);
-}
-function updateGreeting() {
+};
+
+const updateGreeting = () => {
     const hour = new Date().getHours();
-    let greeting = '';
-    if (hour < 12) greeting = 'pagi';
-    else if (hour < 15) greeting = 'siang';
-    else if (hour < 18) greeting = 'sore';
-    else greeting = 'malam';
+    const greeting = hour < 12 ? 'pagi' : hour < 15 ? 'siang' : hour < 18 ? 'sore' : 'malam';
     document.getElementById('greeting').innerText = `Hai, selamat ${greeting}`;
-}
-function toggleTheme() { document.documentElement.classList.toggle('dark'); localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'; }
-function toggleSidebarCollapse() {
+};
+
+const toggleTheme = () => {
+    document.documentElement.classList.toggle('dark');
+    localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+};
+
+const toggleSidebarCollapse = () => {
     if (window.innerWidth < 1024) return;
     isSidebarCollapsed = !isSidebarCollapsed;
     const sidebar = document.getElementById('sidebar');
@@ -44,58 +49,59 @@ function toggleSidebarCollapse() {
     if (isSidebarCollapsed) {
         sidebar.classList.add('sidebar-collapsed');
         main.style.marginLeft = '5rem';
-        icon.classList.remove('fa-chevron-left');
-        icon.classList.add('fa-chevron-right');
+        icon.classList.replace('fa-chevron-left', 'fa-chevron-right');
     } else {
         sidebar.classList.remove('sidebar-collapsed');
         main.style.marginLeft = '18rem';
-        icon.classList.remove('fa-chevron-right');
-        icon.classList.add('fa-chevron-left');
+        icon.classList.replace('fa-chevron-right', 'fa-chevron-left');
     }
     localStorage.setItem('sidebarCollapsed', isSidebarCollapsed);
-}
-function toggleSidebar() {
+};
+
+const toggleSidebar = () => {
     document.getElementById('sidebar').classList.toggle('-translate-x-full');
     document.getElementById('mobile-overlay').classList.toggle('hidden');
-}
-function closeSidebar() {
+};
+
+const closeSidebar = () => {
     document.getElementById('sidebar').classList.add('-translate-x-full');
     document.getElementById('mobile-overlay').classList.add('hidden');
-}
-function switchTab(tabId) {
+};
+
+const switchTab = (tabId) => {
     ['dashboard','transactions','budget','reminders','goals'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
         const btn = document.getElementById(`nav-${t}`);
-        if(btn) btn.className = "nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4";
+        if (btn) btn.className = "nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4";
     });
     document.getElementById(`view-${tabId}`).classList.remove('hidden');
     const activeBtn = document.getElementById(`nav-${tabId}`);
-    if(activeBtn) activeBtn.className = "nav-item-active nav-item w-full flex items-center px-4 py-3 rounded-2xl text-brand-600 dark:text-brand-400 font-semibold transition-all gap-4";
+    if (activeBtn) activeBtn.className = "nav-item-active nav-item w-full flex items-center px-4 py-3 rounded-2xl text-brand-600 dark:text-brand-400 font-semibold transition-all gap-4";
     const titles = { dashboard:'Ringkasan', transactions:'Transaksi', budget:'Anggaran', reminders:'Pengingat', goals:'Target' };
     document.getElementById('header-title').innerText = titles[tabId];
-    if(tabId==='transactions') renderFullTransactions();
-    if(tabId==='budget') renderBudgetSettings();
-    if(tabId==='reminders') renderReminders();
-    if(tabId==='goals') renderGoals();
-    if(window.innerWidth<1024) closeSidebar();
-}
-function calculateBalances() {
+    if (tabId === 'transactions') renderFullTransactions();
+    if (tabId === 'budget') renderBudgetSettings();
+    if (tabId === 'reminders') renderReminders();
+    if (tabId === 'goals') renderGoals();
+    if (window.innerWidth < 1024) closeSidebar();
+};
+
+const calculateBalances = () => {
     const balanceMap = {};
     transactions.forEach(t => {
         const account = t.account || 'Cash';
-        if (!balanceMap[account]) balanceMap[account] = 0;
-        if (t.type === 'income') balanceMap[account] += t.amount;
-        else balanceMap[account] -= t.amount;
+        balanceMap[account] = (balanceMap[account] || 0) + (t.type === 'income' ? t.amount : -t.amount);
     });
     return balanceMap;
-}
-function renderAccountBalances() {
+};
+
+const renderAccountBalances = () => {
     const balances = calculateBalances();
-    const total = Object.values(balances).reduce((a,b) => a + b, 0);
+    const total = Object.values(balances).reduce((a, b) => a + b, 0);
     document.getElementById('sidebar-balance').innerText = formatIDR(total);
     const container = document.getElementById('account-balance-list');
     if (!container) return;
-    const sorted = Object.entries(balances).sort((a,b) => b[1] - a[1]);
+    const sorted = Object.entries(balances).sort((a, b) => b[1] - a[1]);
     container.innerHTML = sorted.map(([acc, bal]) => `
         <div class="glass bg-white/40 dark:bg-dark-surface/40 p-3 md:p-4 rounded-2xl md:rounded-3xl border border-slate-200/30 dark:border-dark-border/50 flex items-center gap-2 md:gap-3 hover:shadow-md transition-shadow">
             <div class="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl bg-brand-100/60 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 text-sm md:text-base">
@@ -103,28 +109,28 @@ function renderAccountBalances() {
             </div>
             <div class="min-w-0 flex-1">
                 <p class="text-[9px] md:text-xs font-bold text-slate-400 uppercase truncate">${acc}</p>
-                <p class="text-xs max-[500px]:text-[0.65rem] sm:text-sm md:text-base font-black whitespace-nowrap overflow-x-auto scrollbar-thin ${bal >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(bal)}</p>
+                <p class="text-sm md:text-base font-black break-words ${bal >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${formatIDR(bal)}</p>
             </div>
         </div>
     `).join('');
     if (sorted.length === 0) container.innerHTML = '<div class="col-span-full text-center text-slate-400 py-4 text-xs md:text-sm">Belum ada saldo akun</div>';
-}
-function updateDateLabel() {
+};
+
+const updateDateLabel = () => {
     const input = document.getElementById('date-filter');
     const label = document.getElementById('date-label');
     if (input.value) {
         const [year, month] = input.value.split('-');
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         label.innerText = `${monthNames[parseInt(month)-1]} ${year}`;
-    } else {
-        label.innerText = '';
-    }
-}
-function refreshAll() {
+    } else label.innerText = '';
+};
+
+const refreshAll = () => {
     const filter = document.getElementById('date-filter').value;
     const filtered = transactions.filter(t => t.date.startsWith(filter));
-    const inc = filtered.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-    const exp = filtered.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const exp = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     document.getElementById('stat-income').innerText = formatIDR(inc);
     document.getElementById('stat-expense').innerText = formatIDR(exp);
     document.getElementById('stat-savings').innerText = formatIDR(inc - exp);
@@ -135,51 +141,61 @@ function refreshAll() {
     updateCharts(filtered);
     renderReminders();
     renderGoals();
-}
-function renderDashboardList(data) {
+};
+
+const renderDashboardList = (data) => {
     const list = document.getElementById('dashboard-tx-list');
-    list.innerHTML = data.slice(0,5).map(t => `<tr class="group hover:bg-slate-100/50 dark:hover:bg-dark-border/30 transition">
-        <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-slate-200/50 dark:bg-dark-surface flex items-center justify-center text-slate-500 text-xs md:text-base"><i class="fa-solid ${CATEGORY_ICONS[t.category]||'fa-tag'}"></i></div><div><p class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-300">${t.desc||t.category}</p><p class="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase">${t.date}</p></div></div></td>
-        <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type==='income'?'text-emerald-600':'text-slate-800 dark:text-white'}">${t.type==='income'?'+':'-'} ${formatIDR(t.amount)}</td></tr>`).join('');
-    if(data.length===0) list.innerHTML = '<tr><td colspan="2" class="p-6 md:p-10 text-center text-slate-400 text-xs md:text-sm">Belum ada transaksi</td></tr>';
-}
-function renderBudgets(data) {
+    list.innerHTML = data.slice(0, 5).map(t => `<tr class="group hover:bg-slate-100/50 dark:hover:bg-dark-border/30 transition">
+        <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-slate-200/50 dark:bg-dark-surface flex items-center justify-center text-slate-500 text-xs md:text-base"><i class="fa-solid ${CATEGORY_ICONS[t.category] || 'fa-tag'}"></i></div><div><p class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-300">${t.desc || t.category}</p><p class="text-[8px] md:text-[9px] text-slate-400 font-bold uppercase">${t.date}</p></div></div></td>
+        <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800 dark:text-white'}">${t.type === 'income' ? '+' : '-'} ${formatIDR(t.amount)}</td></tr>`).join('');
+    if (data.length === 0) list.innerHTML = '<tr><td colspan="2" class="p-6 md:p-10 text-center text-slate-400 text-xs md:text-sm">Belum ada transaksi</td></tr>';
+};
+
+const renderBudgets = (data) => {
     const container = document.getElementById('budget-progress-list');
-    const expByCat = {}; data.filter(t=>t.type==='expense').forEach(t=> expByCat[t.category] = (expByCat[t.category]||0)+t.amount);
-    let html = '', totalLimit=0, totalSpent=0;
+    const expByCat = {};
+    data.filter(t => t.type === 'expense').forEach(t => expByCat[t.category] = (expByCat[t.category] || 0) + t.amount);
+    let html = '', totalLimit = 0, totalSpent = 0;
     CATEGORIES.expense.forEach(cat => {
-        const limit = budgets[cat]||0;
-        if(limit>0) {
-            const spent = expByCat[cat]||0; const perc = Math.min((spent/limit)*100,100);
-            totalLimit+=limit; totalSpent+=spent;
-            html += `<div><div class="flex justify-between text-[10px] md:text-xs font-bold mb-1"><span>${cat}</span><span class="${perc>=90?'text-rose-600':'text-slate-400'}">${perc.toFixed(0)}%</span></div>
+        const limit = budgets[cat] || 0;
+        if (limit > 0) {
+            const spent = expByCat[cat] || 0;
+            const perc = Math.min((spent / limit) * 100, 100);
+            totalLimit += limit;
+            totalSpent += spent;
+            html += `<div><div class="flex justify-between text-[10px] md:text-xs font-bold mb-1"><span>${cat}</span><span class="${perc >= 90 ? 'text-rose-600' : 'text-slate-400'}">${perc.toFixed(0)}%</span></div>
             <div class="h-1.5 md:h-2 w-full bg-slate-200/60 dark:bg-dark-border rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-500 to-brand-400 transition-all duration-700" style="width:${perc}%"></div></div>
             <div class="flex justify-between text-[8px] md:text-[9px] font-bold text-slate-400 mt-1"><span>${formatIDR(spent)}</span><span>${formatIDR(limit)}</span></div></div>`;
         }
     });
     container.innerHTML = html || '<div class="text-center p-4 md:p-6 text-slate-400 text-xs md:text-sm">Belum ada anggaran diatur.</div>';
-    document.getElementById('budget-percentage').innerText = totalLimit>0 ? (totalSpent/totalLimit*100).toFixed(0)+'%' : '0%';
-}
-function renderBudgetSettings() {
+    document.getElementById('budget-percentage').innerText = totalLimit > 0 ? (totalSpent / totalLimit * 100).toFixed(0) + '%' : '0%';
+};
+
+const renderBudgetSettings = () => {
     const container = document.getElementById('budget-input-list');
     container.innerHTML = CATEGORIES.expense.map(cat => `
         <div class="flex items-center gap-2 md:gap-3 bg-white/50 dark:bg-dark-surface/50 p-3 md:p-4 rounded-2xl md:rounded-3xl">
             <div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-white dark:bg-dark-surface flex items-center justify-center text-slate-400 shadow-sm text-xs md:text-base"><i class="fa-solid ${CATEGORY_ICONS[cat]}"></i></div>
-            <div class="flex-1"><p class="text-[9px] md:text-xs font-bold text-slate-500 mb-1">${cat}</p><div class="relative"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] md:text-xs">Rp</span><input type="number" name="budget-${cat}" value="${budgets[cat]||''}" placeholder="Batas" class="w-full pl-4 md:pl-5 bg-transparent border-none p-0 focus:ring-0 text-xs md:text-sm font-black outline-none text-slate-800 dark:text-slate-300"></div></div>
+            <div class="flex-1"><p class="text-[9px] md:text-xs font-bold text-slate-500 mb-1">${cat}</p><div class="relative"><span class="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] md:text-xs">Rp</span><input type="number" name="budget-${cat}" value="${budgets[cat] || ''}" placeholder="Batas" class="w-full pl-4 md:pl-5 bg-transparent border-none p-0 focus:ring-0 text-xs md:text-sm font-black outline-none text-slate-800 dark:text-slate-300"></div></div>
         </div>`).join('');
-}
-function saveBudgets(e) {
+};
+
+const saveBudgets = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    CATEGORIES.expense.forEach(cat => { budgets[cat] = parseFloat(formData.get(`budget-${cat}`))||0; });
+    CATEGORIES.expense.forEach(cat => { budgets[cat] = parseFloat(formData.get(`budget-${cat}`)) || 0; });
     localStorage.setItem('finvault_budgets', JSON.stringify(budgets));
-    refreshAll(); switchTab('dashboard');
+    refreshAll();
+    switchTab('dashboard');
     showToast('Anggaran diperbarui');
-}
-function updateCharts(data) {
-    const expByCat = {}; data.filter(t=>t.type==='expense').forEach(t=> expByCat[t.category] = (expByCat[t.category]||0)+t.amount);
+};
+
+const updateCharts = (data) => {
+    const expByCat = {};
+    data.filter(t => t.type === 'expense').forEach(t => expByCat[t.category] = (expByCat[t.category] || 0) + t.amount);
     const donutCtx = document.getElementById('donutChart').getContext('2d');
-    if(donutChart) donutChart.destroy();
+    if (donutChart) donutChart.destroy();
     donutChart = new Chart(donutCtx, {
         type: 'doughnut',
         data: {
@@ -194,46 +210,72 @@ function updateCharts(data) {
         options: { cutout: '75%', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', titleColor: '#f8fafc' } } }
     });
     const legend = document.getElementById('chart-legend');
-    legend.innerHTML = Object.entries(expByCat).slice(0,5).map(([cat,val],i)=>`
+    legend.innerHTML = Object.entries(expByCat).slice(0, 5).map(([cat, val], i) => `
         <div class="flex justify-between items-center text-[10px] md:text-xs font-medium"><div class="flex items-center gap-1 md:gap-2"><div class="w-2 h-2 md:w-3 md:h-3 rounded-full" style="background:${donutChart.data.datasets[0].backgroundColor[i]}"></div><span>${cat}</span></div><span class="font-bold">${formatIDR(val)}</span></div>
     `).join('');
-    const days = Array.from({length:31},(_,i)=>(i+1).toString().padStart(2,'0'));
+    const days = Array.from({ length: 31 }, (_, i) => (i + 1).toString().padStart(2, '0'));
     const dailyInc = new Array(31).fill(0), dailyExp = new Array(31).fill(0);
-    data.forEach(t => { let d = parseInt(t.date.split('-')[2])-1; if(t.type==='income') dailyInc[d]+=t.amount; else dailyExp[d]+=t.amount; });
+    data.forEach(t => {
+        const d = parseInt(t.date.split('-')[2]) - 1;
+        if (t.type === 'income') dailyInc[d] += t.amount;
+        else dailyExp[d] += t.amount;
+    });
     const mainCtx = document.getElementById('mainChart').getContext('2d');
-    if(mainChart) mainChart.destroy();
+    if (mainChart) mainChart.destroy();
     mainChart = new Chart(mainCtx, {
         type: 'line',
-        data: { labels: days, datasets: [
-            { label:'Masuk', data:dailyInc, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.02)', tension:0.3, fill:true, borderWidth:2, pointRadius:0 },
-            { label:'Keluar', data:dailyExp, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.02)', tension:0.3, fill:true, borderWidth:2, pointRadius:0 }
-        ] },
-        options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales:{ y:{display:false}, x:{grid:{display:false}, ticks:{font:{size:8}}}} }
+        data: {
+            labels: days,
+            datasets: [
+                { label: 'Masuk', data: dailyInc, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.02)', tension: 0.3, fill: true, borderWidth: 2, pointRadius: 0 },
+                { label: 'Keluar', data: dailyExp, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.02)', tension: 0.3, fill: true, borderWidth: 2, pointRadius: 0 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { font: { size: 8 } } } } }
     });
-}
-function renderFullTransactions() {
+};
+
+const renderFullTransactions = () => {
     const globalSearch = document.getElementById('tx-search').value.toLowerCase();
     const typeFilter = document.getElementById('tx-type-filter').value;
     const filtered = transactions.filter(t => {
-        const matchGlobal = (t.desc||'').toLowerCase().includes(globalSearch) || t.category.toLowerCase().includes(globalSearch) || (t.account||'').toLowerCase().includes(globalSearch);
-        const matchType = typeFilter === 'all' || t.type === typeFilter;
-        return matchGlobal && matchType;
+        const matchGlobal = (t.desc || '').toLowerCase().includes(globalSearch) || t.category.toLowerCase().includes(globalSearch) || (t.account || '').toLowerCase().includes(globalSearch);
+        return matchGlobal && (typeFilter === 'all' || t.type === typeFilter);
     });
     document.getElementById('full-tx-body').innerHTML = filtered.map(t => `
         <tr class="hover:bg-slate-100/50 dark:hover:bg-dark-border/30 transition">
-            <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-white/60 dark:bg-dark-surface flex items-center justify-center"><i class="fa-solid ${CATEGORY_ICONS[t.category]||'fa-tag'} text-slate-500 text-xs md:text-base"></i></div><div><p class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-300">${t.desc||'—'}</p><p class="text-[8px] md:text-[9px] text-slate-400 uppercase">${t.date}</p></div></div></td>
+            <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-white/60 dark:bg-dark-surface flex items-center justify-center"><i class="fa-solid ${CATEGORY_ICONS[t.category] || 'fa-tag'} text-slate-500 text-xs md:text-base"></i></div><div><p class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-300">${t.desc || '—'}</p><p class="text-[8px] md:text-[9px] text-slate-400 uppercase">${t.date}</p></div></div></td>
             <td class="px-4 md:px-6 py-3 md:py-4"><span class="px-1.5 md:px-2 py-0.5 md:py-1 rounded-xl text-[8px] md:text-[9px] font-black uppercase bg-slate-200/50 dark:bg-dark-surface text-slate-600 dark:text-slate-400">${t.category}</span></td>
             <td class="px-4 md:px-6 py-3 md:py-4"><span class="text-[10px] md:text-xs font-semibold"><i class="fa-regular fa-building mr-1 text-slate-400"></i>${t.account}</span></td>
-            <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type==='income'?'text-emerald-600':'text-slate-800 dark:text-white'}">${t.type==='income'?'+':'-'} ${formatIDR(t.amount)}</td>
+            <td class="px-4 md:px-6 py-3 md:py-4 text-right font-black text-xs md:text-sm whitespace-nowrap ${t.type === 'income' ? 'text-emerald-600' : 'text-slate-800 dark:text-white'}">${t.type === 'income' ? '+' : '-'} ${formatIDR(t.amount)}</td>
             <td class="px-4 md:px-6 py-3 md:py-4 text-center"><button onclick="deleteTx(${t.id})" class="w-6 h-6 md:w-7 md:h-7 rounded-full text-slate-400 hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-500/10 transition-all"><i class="fa-solid fa-trash-can text-[10px] md:text-xs"></i></button></td>
         </tr>`).join('');
-    if(filtered.length===0) document.getElementById('full-tx-body').innerHTML = '<tr><td colspan="5" class="p-6 md:p-10 text-center text-slate-400 text-xs md:text-sm">Tidak ada transaksi</td></tr>';
-}
-document.getElementById('tx-search').addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => renderFullTransactions(), 300);
-});
-function handleSubmit(e) {
+    if (filtered.length === 0) document.getElementById('full-tx-body').innerHTML = '<tr><td colspan="5" class="p-6 md:p-10 text-center text-slate-400 text-xs md:text-sm">Tidak ada transaksi</td></tr>';
+};
+
+const deleteTx = (id) => {
+    if (confirm('Hapus transaksi ini?')) {
+        transactions = transactions.filter(t => t.id !== id);
+        localStorage.setItem('finvault_tx', JSON.stringify(transactions));
+        refreshAll();
+        if (!document.getElementById('view-transactions').classList.contains('hidden')) renderFullTransactions();
+        showToast('Transaksi dihapus');
+    }
+};
+
+const generateRecurringTransactions = (tx) => {
+    const interval = { daily: 1, weekly: 7, monthly: 30 }[tx.recurringType];
+    if (!interval) return;
+    const startDate = new Date(tx.date);
+    for (let i = 1; i <= 12; i++) {
+        const nextDate = new Date(startDate);
+        nextDate.setDate(startDate.getDate() + interval * i);
+        if (nextDate > new Date(new Date().setMonth(new Date().getMonth() + 6))) break;
+        transactions.push({ ...tx, id: Date.now() + i, date: nextDate.toISOString().split('T')[0] });
+    }
+};
+
+const handleSubmit = (e) => {
     e.preventDefault();
     const type = document.getElementById('f-type').value;
     const amount = parseFloat(document.getElementById('f-amount').value);
@@ -242,107 +284,41 @@ function handleSubmit(e) {
     const category = document.getElementById('f-category').value;
     const desc = document.getElementById('f-desc').value;
     const recurring = document.getElementById('f-recurring').checked;
-    let recurringType = null;
-    if (recurring) recurringType = document.getElementById('f-recurring-type').value;
+    const recurringType = recurring ? document.getElementById('f-recurring-type').value : null;
+
     if (type === 'expense' && category === 'Tarik Tunai') {
-        if (account === 'Cash') {
-            alert('Tidak dapat melakukan tarik tunai dari akun Cash.');
-            return;
-        }
-        const expenseTx = {
-            id: Date.now(),
-            type: 'expense',
-            amount: amount,
-            date: date,
-            account: account,
-            category: 'Tarik Tunai',
-            desc: 'Tarik Tunai ke Cash'
-        };
-        const incomeTx = {
-            id: Date.now() + 1,
-            type: 'income',
-            amount: amount,
-            date: date,
-            account: 'Cash',
-            category: 'Tarik Tunai',
-            desc: `Tarik Tunai dari ${account}`
-        };
-        transactions.unshift(expenseTx, incomeTx);
+        if (account === 'Cash') return alert('Tidak dapat melakukan tarik tunai dari akun Cash.');
+        const idBase = Date.now();
+        transactions.unshift(
+            { id: idBase, type: 'expense', amount, date, account, category: 'Tarik Tunai', desc: 'Tarik Tunai ke Cash' },
+            { id: idBase + 1, type: 'income', amount, date, account: 'Cash', category: 'Tarik Tunai', desc: `Tarik Tunai dari ${account}` }
+        );
     } else if (type === 'expense' && category === 'Top Up E-Wallet') {
-        if (account === 'E-Wallet') {
-            alert('Tidak dapat melakukan top up dari akun E-Wallet.');
-            return;
-        }
-        const expenseTx = {
-            id: Date.now(),
-            type: 'expense',
-            amount: amount,
-            date: date,
-            account: account,
-            category: 'Top Up E-Wallet',
-            desc: `Top Up ke E-Wallet`
-        };
-        const incomeTx = {
-            id: Date.now() + 1,
-            type: 'income',
-            amount: amount,
-            date: date,
-            account: 'E-Wallet',
-            category: 'Top Up E-Wallet',
-            desc: `Top Up dari ${account}`
-        };
-        transactions.unshift(expenseTx, incomeTx);
+        if (account === 'E-Wallet') return alert('Tidak dapat melakukan top up dari akun E-Wallet.');
+        const idBase = Date.now();
+        transactions.unshift(
+            { id: idBase, type: 'expense', amount, date, account, category: 'Top Up E-Wallet', desc: 'Top Up ke E-Wallet' },
+            { id: idBase + 1, type: 'income', amount, date, account: 'E-Wallet', category: 'Top Up E-Wallet', desc: `Top Up dari ${account}` }
+        );
     } else {
-        const newTx = {
-            id: Date.now(),
-            type: type,
-            amount: amount,
-            date: date,
-            account: account,
-            category: category,
-            desc: desc,
-            recurring: recurring,
-            recurringType: recurringType
-        };
+        const newTx = { id: Date.now(), type, amount, date, account, category, desc, recurring, recurringType };
         transactions.unshift(newTx);
         if (recurring) generateRecurringTransactions(newTx);
     }
     localStorage.setItem('finvault_tx', JSON.stringify(transactions));
     refreshAll();
-    if (!document.getElementById('view-transactions').classList.contains('hidden')) {
-        renderFullTransactions();
-    }
+    if (!document.getElementById('view-transactions').classList.contains('hidden')) renderFullTransactions();
     closeModal();
     e.target.reset();
     setFormType('expense');
     showToast('Transaksi berhasil ditambahkan');
-}
-function generateRecurringTransactions(tx) {
-    const interval = { daily:1, weekly:7, monthly:30 }[tx.recurringType];
-    if (!interval) return;
-    const startDate = new Date(tx.date);
-    for (let i=1; i<=12; i++) {
-        const nextDate = new Date(startDate);
-        nextDate.setDate(startDate.getDate() + interval * i);
-        if (nextDate > new Date(new Date().setMonth(new Date().getMonth()+6))) break;
-        const newTx = { ...tx, id: Date.now()+i, date: nextDate.toISOString().split('T')[0] };
-        transactions.push(newTx);
-    }
-}
-function deleteTx(id) {
-    if (confirm('Hapus transaksi ini?')) {
-        transactions = transactions.filter(t => t.id !== id);
-        localStorage.setItem('finvault_tx', JSON.stringify(transactions));
-        refreshAll();
-        renderFullTransactions();
-        showToast('Transaksi dihapus');
-    }
-}
-function renderReminders() {
+};
+
+const renderReminders = () => {
     const container = document.getElementById('reminder-list');
     if (!container) return;
     const today = new Date().toISOString().split('T')[0];
-    reminders.sort((a,b) => a.date.localeCompare(b.date));
+    reminders.sort((a, b) => a.date.localeCompare(b.date));
     container.innerHTML = reminders.map(r => {
         const overdue = r.date < today ? 'text-rose-600' : '';
         return `
@@ -359,29 +335,31 @@ function renderReminders() {
         </div>`;
     }).join('');
     if (reminders.length === 0) container.innerHTML = '<div class="col-span-full text-center text-slate-400 py-4 text-xs md:text-sm">Belum ada pengingat</div>';
-}
-function saveReminder(e) {
+};
+
+const saveReminder = (e) => {
     e.preventDefault();
-    const newReminder = {
+    reminders.push({
         id: Date.now(),
         title: document.getElementById('reminder-title').value,
         amount: parseFloat(document.getElementById('reminder-amount').value) || null,
         date: document.getElementById('reminder-date').value,
         desc: document.getElementById('reminder-desc').value
-    };
-    reminders.push(newReminder);
+    });
     localStorage.setItem('finvault_reminders', JSON.stringify(reminders));
     renderReminders();
     closeReminderModal();
     showToast('Pengingat ditambahkan');
-}
-function deleteReminder(id) {
+};
+
+const deleteReminder = (id) => {
     reminders = reminders.filter(r => r.id !== id);
     localStorage.setItem('finvault_reminders', JSON.stringify(reminders));
     renderReminders();
     showToast('Pengingat dihapus');
-}
-function renderGoals() {
+};
+
+const renderGoals = () => {
     const container = document.getElementById('goal-list');
     if (!container) return;
     container.innerHTML = goals.map(g => {
@@ -406,83 +384,78 @@ function renderGoals() {
         </div>`;
     }).join('');
     if (goals.length === 0) container.innerHTML = '<div class="col-span-full text-center text-slate-400 py-4 text-xs md:text-sm">Belum ada target</div>';
-}
-function saveGoal(e) {
+};
+
+const saveGoal = (e) => {
     e.preventDefault();
-    const newGoal = {
+    goals.push({
         id: Date.now(),
         name: document.getElementById('goal-name').value,
         target: parseFloat(document.getElementById('goal-target').value),
         current: parseFloat(document.getElementById('goal-current').value) || 0,
         deadline: document.getElementById('goal-deadline').value || null
-    };
-    goals.push(newGoal);
+    });
     localStorage.setItem('finvault_goals', JSON.stringify(goals));
     renderGoals();
     closeGoalModal();
     showToast('Target ditambahkan');
-}
-function deleteGoal(id) {
+};
+
+const deleteGoal = (id) => {
     goals = goals.filter(g => g.id !== id);
     localStorage.setItem('finvault_goals', JSON.stringify(goals));
     renderGoals();
     showToast('Target dihapus');
-}
-function setFormType(type) {
+};
+
+const setFormType = (type) => {
     document.getElementById('f-type').value = type;
-    document.getElementById('type-exp').className = type==='expense'?'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-rose-600 shadow-sm transition-all':'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold text-slate-500 transition-all';
-    document.getElementById('type-inc').className = type==='income'?'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-emerald-600 shadow-sm transition-all':'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold text-slate-500 transition-all';
+    document.getElementById('type-exp').className = type === 'expense' ? 'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-rose-600 shadow-sm transition-all' : 'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold text-slate-500 transition-all';
+    document.getElementById('type-inc').className = type === 'income' ? 'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold bg-white dark:bg-dark-surface text-emerald-600 shadow-sm transition-all' : 'py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold text-slate-500 transition-all';
     const catSelect = document.getElementById('f-category');
     catSelect.innerHTML = CATEGORIES[type].map(c => `<option value="${c}">${c}</option>`).join('');
-}
-document.getElementById('f-recurring').addEventListener('change', function(e) {
-    document.getElementById('recurring-options').classList.toggle('hidden', !e.target.checked);
-});
-function openModal() { document.getElementById('tx-modal').classList.remove('hidden'); document.getElementById('tx-modal').classList.add('flex'); document.getElementById('f-date').valueAsDate = new Date(); }
-function closeModal() { document.getElementById('tx-modal').classList.add('hidden'); document.getElementById('tx-modal').classList.remove('flex'); }
-function openReminderModal() { document.getElementById('reminder-modal').classList.remove('hidden'); document.getElementById('reminder-modal').classList.add('flex'); }
-function closeReminderModal() { document.getElementById('reminder-modal').classList.add('hidden'); document.getElementById('reminder-modal').classList.remove('flex'); }
-function openGoalModal() { document.getElementById('goal-modal').classList.remove('hidden'); document.getElementById('goal-modal').classList.add('flex'); }
-function closeGoalModal() { document.getElementById('goal-modal').classList.add('hidden'); document.getElementById('goal-modal').classList.remove('flex'); }
-function formatDateIndo(dateStr) {
+};
+
+const formatDateIndo = (dateStr) => {
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const [y, m, d] = dateStr.split('-');
-    return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
-}
-function formatMonthIndo(monthStr) {
+    return `${parseInt(d)} ${months[parseInt(m) - 1]} ${y}`;
+};
+
+const formatMonthIndo = (monthStr) => {
     const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
     const [y, m] = monthStr.split('-');
-    return `${months[parseInt(m)-1]} ${y}`;
-}
-function downloadCSV() {
+    return `${months[parseInt(m) - 1]} ${y}`;
+};
+
+const downloadCSV = () => {
     const filter = document.getElementById('date-filter').value;
     const filtered = transactions.filter(t => t.date.startsWith(filter));
-    const inc = filtered.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-    const exp = filtered.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const exp = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     const saldo = inc - exp;
     let csv = 'LAPORAN KEUANGAN BULANAN\n';
     csv += `Periode:,${formatMonthIndo(filter)}\n`;
-    csv += `Total Pemasukan:,${formatIDR(inc).replace(/Rp/g,'').trim()}\n`;
-    csv += `Total Pengeluaran:,${formatIDR(exp).replace(/Rp/g,'').trim()}\n`;
-    csv += `Saldo Bersih:,${formatIDR(saldo).replace(/Rp/g,'').trim()}\n\n`;
+    csv += `Total Pemasukan:,${formatIDR(inc).replace(/Rp/g, '').trim()}\n`;
+    csv += `Total Pengeluaran:,${formatIDR(exp).replace(/Rp/g, '').trim()}\n`;
+    csv += `Saldo Bersih:,${formatIDR(saldo).replace(/Rp/g, '').trim()}\n\n`;
     csv += 'Tanggal,Tipe,Kategori,Akun,Deskripsi,Nominal (IDR)\n';
     filtered.forEach(t => {
-        let nominal = t.type === 'income' ? t.amount : -t.amount;
-        let tipe = t.type === 'income' ? 'Pemasukan' : 'Pengeluaran';
-        csv += `${formatDateIndo(t.date)},${tipe},${t.category},${t.account},"${t.desc||''}",${nominal}\n`;
+        csv += `${formatDateIndo(t.date)},${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'},${t.category},${t.account},"${t.desc || ''}",${t.type === 'income' ? t.amount : -t.amount}\n`;
     });
-    const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `LapKeuangan_${filter}.csv`;
     a.click();
     showToast('CSV diekspor');
-}
-function downloadPDF() {
+};
+
+const downloadPDF = () => {
     const filter = document.getElementById('date-filter').value;
     const filtered = transactions.filter(t => t.date.startsWith(filter));
-    const inc = filtered.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
-    const exp = filtered.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+    const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const exp = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     const saldo = inc - exp;
     const doc = new jspdf.jsPDF();
     doc.setFontSize(16);
@@ -490,7 +463,6 @@ function downloadPDF() {
     doc.text('LAPORAN KEUANGAN', 105, 20, { align: 'center' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
-    doc.setLineHeightFactor(1.15);
     let y = 35;
     doc.text('Periode:', 20, y);
     doc.text(formatMonthIndo(filter), 70, y);
@@ -504,28 +476,63 @@ function downloadPDF() {
     doc.text('Saldo Bersih:', 20, y);
     doc.text(formatIDR(saldo), 70, y);
     y += 10;
-    const tableData = filtered.map(t => [
-        formatDateIndo(t.date),
-        t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
-        t.category,
-        t.account,
-        t.desc || '-',
-        formatIDR(t.amount)
-    ]);
     doc.autoTable({
         head: [['Tanggal', 'Tipe', 'Kategori', 'Akun', 'Deskripsi', 'Nominal']],
-        body: tableData,
+        body: filtered.map(t => [
+            formatDateIndo(t.date),
+            t.type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+            t.category,
+            t.account,
+            t.desc || '-',
+            formatIDR(t.amount)
+        ]),
         startY: y,
         styles: { fontSize: 8, lineHeight: 1.15 },
         headStyles: { fillColor: [99, 102, 241] }
     });
     doc.save(`LapKeuangan_${filter}.pdf`);
     showToast('PDF diekspor');
-}
-window.onload = () => {
-    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+};
+
+const openModal = () => {
+    document.getElementById('tx-modal').classList.remove('hidden');
+    document.getElementById('tx-modal').classList.add('flex');
+    document.getElementById('f-date').valueAsDate = new Date();
+    document.getElementById('recurring-options').classList.add('hidden');
+    document.getElementById('f-recurring').checked = false;
+};
+
+const closeModal = () => {
+    document.getElementById('tx-modal').classList.add('hidden');
+    document.getElementById('tx-modal').classList.remove('flex');
+};
+
+const openReminderModal = () => {
+    document.getElementById('reminder-modal').classList.remove('hidden');
+    document.getElementById('reminder-modal').classList.add('flex');
+};
+
+const closeReminderModal = () => {
+    document.getElementById('reminder-modal').classList.add('hidden');
+    document.getElementById('reminder-modal').classList.remove('flex');
+};
+
+const openGoalModal = () => {
+    document.getElementById('goal-modal').classList.remove('hidden');
+    document.getElementById('goal-modal').classList.add('flex');
+};
+
+const closeGoalModal = () => {
+    document.getElementById('goal-modal').classList.add('hidden');
+    document.getElementById('goal-modal').classList.remove('flex');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+    }
     const today = new Date();
-    const yearMonth = today.toISOString().slice(0,7);
+    const yearMonth = today.toISOString().slice(0, 7);
     document.getElementById('date-filter').value = yearMonth;
     updateDateLabel();
     setFormType('expense');
@@ -533,21 +540,30 @@ window.onload = () => {
     if (isSidebarCollapsed && window.innerWidth >= 1024) {
         document.getElementById('sidebar').classList.add('sidebar-collapsed');
         document.getElementById('main-content').style.marginLeft = '5rem';
-        document.getElementById('collapse-icon').classList.replace('fa-chevron-left','fa-chevron-right');
+        document.getElementById('collapse-icon').classList.replace('fa-chevron-left', 'fa-chevron-right');
     }
     document.getElementById('current-year').innerText = new Date().getFullYear();
     refreshAll();
-};
-window.addEventListener('resize', function() {
+
+    document.getElementById('f-recurring').addEventListener('change', (e) => {
+        document.getElementById('recurring-options').classList.toggle('hidden', !e.target.checked);
+    });
+
+    const searchInput = document.getElementById('tx-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => renderFullTransactions(), 300);
+        });
+    }
+});
+
+window.addEventListener('resize', () => {
     if (window.innerWidth < 1024) {
         document.getElementById('sidebar').classList.add('-translate-x-full');
         document.getElementById('mobile-overlay').classList.add('hidden');
         document.getElementById('main-content').style.marginLeft = '0';
     } else {
-        if (!isSidebarCollapsed) {
-            document.getElementById('main-content').style.marginLeft = '18rem';
-        } else {
-            document.getElementById('main-content').style.marginLeft = '5rem';
-        }
+        document.getElementById('main-content').style.marginLeft = isSidebarCollapsed ? '5rem' : '18rem';
     }
 }, { passive: true });
