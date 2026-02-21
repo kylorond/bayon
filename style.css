@@ -37,3 +37,13 @@
     color: #e2e8f0;
     border-color: #334155;
 }
+.scrollbar-thin::-webkit-scrollbar {
+    height: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #475569;
+}
