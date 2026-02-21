@@ -840,11 +840,13 @@ function downloadCSV() {
     const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const exp = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     const selisih = inc - exp;
+    const totalSaldo = Object.values(calculateBalances()).reduce((a, b) => a + b, 0);
     let csv = 'LAPORAN KEUANGAN BULANAN\n';
-    csv += `Periode:,${formatMonthIndo(filter)}\n`;
-    csv += `Total Pemasukan:,${formatIDR(inc).replace(/Rp/g, '').trim()}\n`;
-    csv += `Total Pengeluaran:,${formatIDR(exp).replace(/Rp/g, '').trim()}\n`;
-    csv += `Selisih:,${formatIDR(selisih).replace(/Rp/g, '').trim()}\n\n`;
+    csv += `Periode :,${formatMonthIndo(filter)}\n`;
+    csv += `Total Pemasukan :,${inc}\n`;
+    csv += `Total Pengeluaran :,${exp}\n`;
+    csv += `Selisih :,${selisih}\n`;
+    csv += `Total Saldo :,${totalSaldo}\n\n`;
     csv += 'Tanggal,Tipe,Kategori,Akun,Deskripsi,Nominal (IDR)\n';
     filtered.forEach(t => {
         const tipe = t.type === 'income' ? 'Pemasukan' : t.type === 'expense' ? 'Pengeluaran' : 'Transfer';
@@ -863,10 +865,12 @@ function downloadCSV() {
 
 function downloadPDF() {
     const filter = document.getElementById('date-filter').value;
-    const filtered = transactions.filter(t => t.date.startsWith(filter));
+    const filtered = transactions.filter(t => t.date.startsWith(filter)).sort((a, b) => a.date.localeCompare(b.date));
     const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const exp = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
     const selisih = inc - exp;
+    const totalSaldo = Object.values(calculateBalances()).reduce((a, b) => a + b, 0);
+    
     const doc = new jspdf.jsPDF();
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
@@ -885,17 +889,29 @@ function downloadPDF() {
     y += 7;
     doc.text('Selisih:', 20, y);
     doc.text(formatIDR(selisih), 70, y);
+    y += 7;
+    doc.text('Total Saldo:', 20, y);
+    doc.text(formatIDR(totalSaldo), 70, y);
     y += 10;
-    doc.autoTable({
-        head: [['Tanggal', 'Tipe', 'Kategori', 'Akun', 'Deskripsi', 'Nominal']],
-        body: filtered.map(t => [
-            formatDateIndo(t.date),
+
+    const body = [];
+    let prevDate = '';
+    filtered.forEach(t => {
+        const dateStr = prevDate === t.date ? '' : formatDateIndo(t.date);
+        prevDate = t.date;
+        body.push([
+            dateStr,
             t.type === 'income' ? 'Pemasukan' : t.type === 'expense' ? 'Pengeluaran' : 'Transfer',
             t.category || 'Transfer',
             (accounts.find(a => a.id == t.account)?.name || t.account) + (t.toAccount ? ' → ' + (accounts.find(a=>a.id==t.toAccount)?.name || t.toAccount) : ''),
             t.desc || '-',
             formatIDR(t.amount)
-        ]),
+        ]);
+    });
+
+    doc.autoTable({
+        head: [['Tanggal', 'Tipe', 'Kategori', 'Akun', 'Deskripsi', 'Nominal']],
+        body: body,
         startY: y,
         styles: { fontSize: 8, lineHeight: 1.15 },
         headStyles: { fillColor: [99, 102, 241] }
