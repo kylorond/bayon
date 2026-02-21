@@ -839,12 +839,12 @@ function downloadCSV() {
     const filtered = transactions.filter(t => t.date.startsWith(filter));
     const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const exp = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-    const saldo = inc - exp;
+    const selisih = inc - exp;
     let csv = 'LAPORAN KEUANGAN BULANAN\n';
     csv += `Periode:,${formatMonthIndo(filter)}\n`;
     csv += `Total Pemasukan:,${formatIDR(inc).replace(/Rp/g, '').trim()}\n`;
     csv += `Total Pengeluaran:,${formatIDR(exp).replace(/Rp/g, '').trim()}\n`;
-    csv += `Saldo Bersih:,${formatIDR(saldo).replace(/Rp/g, '').trim()}\n\n`;
+    csv += `Selisih:,${formatIDR(selisih).replace(/Rp/g, '').trim()}\n\n`;
     csv += 'Tanggal,Tipe,Kategori,Akun,Deskripsi,Nominal (IDR)\n';
     filtered.forEach(t => {
         const tipe = t.type === 'income' ? 'Pemasukan' : t.type === 'expense' ? 'Pengeluaran' : 'Transfer';
@@ -866,7 +866,7 @@ function downloadPDF() {
     const filtered = transactions.filter(t => t.date.startsWith(filter));
     const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
     const exp = filtered.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-    const saldo = inc - exp;
+    const selisih = inc - exp;
     const doc = new jspdf.jsPDF();
     doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
@@ -883,8 +883,8 @@ function downloadPDF() {
     doc.text('Total Pengeluaran:', 20, y);
     doc.text(formatIDR(exp), 70, y);
     y += 7;
-    doc.text('Saldo Bersih:', 20, y);
-    doc.text(formatIDR(saldo), 70, y);
+    doc.text('Selisih:', 20, y);
+    doc.text(formatIDR(selisih), 70, y);
     y += 10;
     doc.autoTable({
         head: [['Tanggal', 'Tipe', 'Kategori', 'Akun', 'Deskripsi', 'Nominal']],
