@@ -2,14 +2,14 @@
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>Manajemen Keuangan by Ron</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script>
@@ -19,7 +19,7 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4b' },
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4f' },
                         dark: { bg: '#0f172a', surface: '#1e293b', border: '#334155', accent: '#94a3b8' }
                     }
                 }
@@ -117,46 +117,46 @@
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 space-y-6 md:space-y-8" id="content-area">
             <div id="view-dashboard" class="animate-fade space-y-6 md:space-y-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-emerald-100/70 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-xl md:text-2xl">
+                    <div class="glass p-4 sm:p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-3 sm:gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-emerald-100/70 dark:bg-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 text-lg sm:text-xl md:text-2xl">
                             <i class="fa-solid fa-arrow-trend-up"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Pemasukan</p>
-                            <h4 class="text-sm max-[500px]:text-xs sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white whitespace-nowrap overflow-x-auto scrollbar-thin" id="stat-income">Rp 0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-income">Rp 0</h4>
                         </div>
                     </div>
-                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-rose-100/70 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 text-xl md:text-2xl">
+                    <div class="glass p-4 sm:p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-3 sm:gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-rose-100/70 dark:bg-rose-500/20 flex items-center justify-center text-rose-600 dark:text-rose-400 text-lg sm:text-xl md:text-2xl">
                             <i class="fa-solid fa-arrow-trend-down"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Pengeluaran</p>
-                            <h4 class="text-sm max-[500px]:text-xs sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white whitespace-nowrap overflow-x-auto scrollbar-thin" id="stat-expense">Rp 0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-expense">Rp 0</h4>
                         </div>
                     </div>
-                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-brand-100/70 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 text-xl md:text-2xl">
+                    <div class="glass p-4 sm:p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-3 sm:gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-brand-100/70 dark:bg-brand-500/20 flex items-center justify-center text-brand-600 dark:text-brand-400 text-lg sm:text-xl md:text-2xl">
                             <i class="fa-solid fa-piggy-bank"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Tabungan</p>
-                            <h4 class="text-sm max-[500px]:text-xs sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white whitespace-nowrap overflow-x-auto scrollbar-thin" id="stat-savings">Rp 0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-savings">Rp 0</h4>
                         </div>
                     </div>
-                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
-                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-purple-100/70 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-xl md:text-2xl">
+                    <div class="glass p-4 sm:p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border flex items-center gap-3 sm:gap-4 backdrop-blur-xl hover:shadow-lg transition-shadow">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-2xl bg-purple-100/70 dark:bg-purple-500/20 flex items-center justify-center text-purple-600 dark:text-purple-400 text-lg sm:text-xl md:text-2xl">
                             <i class="fa-solid fa-credit-card"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Transaksi</p>
-                            <h4 class="text-sm max-[500px]:text-xs sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white whitespace-nowrap overflow-x-auto scrollbar-thin" id="stat-count">0</h4>
+                            <h4 class="text-sm sm:text-base md:text-lg lg:text-xl font-black text-slate-800 dark:text-white break-words" id="stat-count">0</h4>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-                    <div class="lg:col-span-2 glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
+                    <div class="lg:col-span-2 glass p-4 sm:p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl hover:shadow-lg transition-shadow">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-base md:text-lg font-extrabold tracking-tight text-slate-700 dark:text-slate-300">Arus Kas 30 Hari</h3>
                             <div class="flex gap-2 md:gap-3">
@@ -173,7 +173,7 @@
                         </div>
                     </div>
 
-                    <div class="glass p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl flex flex-col hover:shadow-lg transition-shadow">
+                    <div class="glass p-4 sm:p-5 md:p-6 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl flex flex-col hover:shadow-lg transition-shadow">
                         <h3 class="text-base md:text-lg font-extrabold tracking-tight text-slate-700 dark:text-slate-300 mb-4">Distribusi Pengeluaran</h3>
                         <div class="flex flex-col items-center justify-center flex-1">
                             <div class="relative w-full max-w-[180px] md:max-w-[220px] mx-auto">
@@ -256,7 +256,7 @@
             </div>
 
             <div id="view-budget" class="hidden animate-fade max-w-3xl mx-auto">
-                <div class="glass p-5 md:p-8 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl">
+                <div class="glass p-4 sm:p-5 md:p-8 rounded-3xl border border-slate-200/40 dark:border-dark-border backdrop-blur-xl">
                     <h3 class="text-xl md:text-2xl font-extrabold text-slate-700 dark:text-slate-300 mb-2">Target Anggaran</h3>
                     <p class="text-slate-400 text-xs md:text-sm mb-6 md:mb-8 font-medium">Atur batas pengeluaran bulanan per kategori.</p>
                     <form onsubmit="saveBudgets(event)" class="space-y-5 md:space-y-6">
@@ -321,7 +321,7 @@
             <div class="space-y-3 md:space-y-4">
                 <div class="relative">
                     <span class="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm md:text-base">Rp</span>
-                    <input type="number" id="f-amount" placeholder="0" required class="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-3 md:py-4 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl md:rounded-3xl font-black text-lg md:text-2xl focus:ring-2 focus:ring-brand-500 outline-none">
+                    <input type="number" id="f-amount" placeholder="0" min="0" step="1" required class="w-full pl-10 md:pl-12 pr-3 md:pr-4 py-3 md:py-4 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl md:rounded-3xl font-black text-lg md:text-2xl focus:ring-2 focus:ring-brand-500 outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-3 md:gap-4">
                     <div>
@@ -386,7 +386,7 @@
             </div>
             <div>
                 <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Jumlah (Rp)</label>
-                <input type="number" id="reminder-amount" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                <input type="number" id="reminder-amount" min="0" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
             </div>
             <div>
                 <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Tanggal Jatuh Tempo</label>
@@ -415,11 +415,11 @@
             </div>
             <div>
                 <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Target Nominal (Rp)</label>
-                <input type="number" id="goal-target" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                <input type="number" id="goal-target" min="1" required class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
             </div>
             <div>
                 <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Terkumpul Saat Ini (Rp)</label>
-                <input type="number" id="goal-current" value="0" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                <input type="number" id="goal-current" value="0" min="0" class="w-full px-2 md:px-4 py-2 md:py-3 bg-white/60 dark:bg-dark-surface/60 border-none rounded-xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
             </div>
             <div>
                 <label class="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase ml-1 md:ml-2">Batas Waktu</label>
