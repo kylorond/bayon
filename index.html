@@ -246,17 +246,17 @@
                             <p class="text-[10px] md:text-xs text-slate-400 font-medium">Kelola riwayat keuangan Anda</p>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <div class="relative flex-1 min-w-[150px] px-3 py-2">
+                            <div class="relative flex-1 min-w-[150px]">
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm z-10"></i>
                                 <input type="text" id="tx-search" placeholder="Cari..." class="w-full pl-9 pr-4 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
                             </div>
-                            <select id="tx-type-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer text-slate-600 dark:text-slate-400">
+                            <select id="tx-type-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer">
                                 <option value="all">Semua</option>
                                 <option value="income">Pemasukan</option>
                                 <option value="expense">Pengeluaran</option>
                                 <option value="transfer">Transfer</option>
                             </select>
-                            <select id="tx-account-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer text-slate-600 dark:text-slate-400">
+                            <select id="tx-account-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer">
                                 <option value="all">Semua Akun</option>
                             </select>
                         </div>
@@ -272,7 +272,7 @@
                                     <th class="px-4 md:px-6 py-3 md:py-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="full-tx-body" class="divide-y divide-slate-200/30 dark:divide-dark-border text-xs md:text-sm text-slate-600 dark:text-slate-400"></tbody>
+                            <tbody id="full-tx-body" class="divide-y divide-slate-200/30 dark:divide-dark-border text-xs md:text-sm"></tbody>
                         </table>
                     </div>
                 </div>
@@ -376,7 +376,7 @@
             </div>
 
             <footer class="text-center text-slate-400 text-[10px] md:text-xs py-4 md:py-6 border-t border-slate-200/30 dark:border-dark-border/50 mt-6 md:mt-12">
-                © <span id="current-year"></span> <a href="https://www.instagram.com/baronnd_" class="hover:text-brand-500">Baron.</a> All rights reserved.
+                © <span id="current-year"></span> <a href="https://www.instagram.com/baronnnd_" target="_blank" class="hover:text-brand-500">Baron.</a> All rights reserved.
             </footer>
         </div>
     </main>
