@@ -660,7 +660,13 @@ function renderFullTransactions() {
     const typeFilter = document.getElementById('tx-type-filter').value;
     const accountFilter = document.getElementById('tx-account-filter').value;
     const filtered = transactions.filter(t => {
-        if (typeFilter !== 'all' && t.type !== typeFilter) return false;
+        if (typeFilter !== 'all') {
+            if (typeFilter === 'transfer') {
+                if (t.transferId === undefined) return false;
+            } else {
+                if (t.type !== typeFilter) return false;
+            }
+        }
         if (accountFilter !== 'all' && t.account != accountFilter && t.toAccount != accountFilter) return false;
         const matchGlobal = (t.desc || '').toLowerCase().includes(globalSearch) || (t.category || '').toLowerCase().includes(globalSearch) || (accounts.find(a=>a.id==t.account)?.name || '').toLowerCase().includes(globalSearch);
         return matchGlobal;
@@ -977,10 +983,10 @@ function downloadCSV() {
     const totalSaldo = Object.values(calculateBalances()).reduce((a, b) => a + b, 0);
     let csv = 'LAPORAN KEUANGAN BULANAN\n';
     csv += `Periode:,${formatMonthIndo(filter)}\n`;
-    csv += `Total Pemasukan :,${inc}\n`;
-    csv += `Total Pengeluaran :,${exp}\n`;
-    csv += `Selisih :,${selisih}\n`;
-    csv += `Total Saldo :,${totalSaldo}\n\n`;
+    csv += `Total Pemasukan:,${inc}\n`;
+    csv += `Total Pengeluaran:,${exp}\n`;
+    csv += `Selisih:,${selisih}\n`;
+    csv += `Total Saldo:,${totalSaldo}\n\n`;
     csv += 'Tanggal,Tipe,Kategori,Akun,Deskripsi,Nominal (IDR)\n';
     filtered.forEach(t => {
         const tipe = t.type === 'income' ? 'Pemasukan' : t.type === 'expense' ? 'Pengeluaran' : 'Transfer';
@@ -1012,19 +1018,19 @@ function downloadPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     let y = 35;
-    doc.text('Periode :', 20, y);
+    doc.text('Periode:', 20, y);
     doc.text(formatMonthIndo(filter), 70, y);
     y += 7;
-    doc.text('Total Pemasukan :', 20, y);
+    doc.text('Total Pemasukan:', 20, y);
     doc.text(formatIDR(inc), 70, y);
     y += 7;
-    doc.text('Total Pengeluaran :', 20, y);
+    doc.text('Total Pengeluaran:', 20, y);
     doc.text(formatIDR(exp), 70, y);
     y += 7;
-    doc.text('Selisih :', 20, y);
+    doc.text('Selisih:', 20, y);
     doc.text(formatIDR(selisih), 70, y);
     y += 7;
-    doc.text('Total Saldo :', 20, y);
+    doc.text('Total Saldo:', 20, y);
     doc.text(formatIDR(totalSaldo), 70, y);
     y += 10;
 
