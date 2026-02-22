@@ -1,4 +1,5 @@
 let transactions = JSON.parse(localStorage.getItem('finvault_tx')) || [];
+let recurringRules = JSON.parse(localStorage.getItem('finvault_recurring')) || [];
 let accounts = JSON.parse(localStorage.getItem('finvault_accounts')) || [];
 let categories = JSON.parse(localStorage.getItem('finvault_categories')) || {};
 let budgets = JSON.parse(localStorage.getItem('finvault_budgets')) || {};
@@ -263,13 +264,16 @@ function deleteCategory(type, name) {
 }
 
 function populateAccountSelects() {
-    const selects = ['f-account', 'f-to-account', 'tx-account-filter'];
+    const selects = ['f-account', 'f-to-account', 'tx-account-filter', 'goal-account'];
     selects.forEach(id => {
         const select = document.getElementById(id);
         if (!select) return;
         select.innerHTML = '';
         if (id === 'tx-account-filter') {
             select.innerHTML = '<option value="all">Semua Akun</option>';
+        }
+        if (id === 'goal-account') {
+            select.innerHTML = '<option value="">Pilih Akun</option>';
         }
         accounts.forEach(acc => {
             const option = document.createElement('option');
@@ -358,6 +362,53 @@ function closeModal() {
     document.getElementById('tx-modal').classList.remove('flex');
 }
 
+function processRecurring() {
+    const today = new Date().toISOString().split('T')[0];
+    let changed = false;
+    recurringRules = recurringRules.filter(rule => {
+        if (!rule.active) return true;
+        if (rule.nextDate <= today) {
+            const newTx = {
+                id: Date.now(),
+                type: rule.type,
+                amount: rule.amount,
+                date: today,
+                account: rule.account,
+                category: rule.category,
+                desc: rule.desc,
+                recurring: true,
+                recurringType: rule.interval,
+                ruleId: rule.id
+            };
+            if (rule.type === 'transfer') {
+                newTx.toAccount = rule.toAccount;
+            }
+            transactions.unshift(newTx);
+            const next = new Date(rule.nextDate);
+            if (rule.interval === 'daily') next.setDate(next.getDate() + 1);
+            else if (rule.interval === 'weekly') next.setDate(next.getDate() + 7);
+            else if (rule.interval === 'monthly') next.setMonth(next.getMonth() + 1);
+            rule.nextDate = next.toISOString().split('T')[0];
+            changed = true;
+        }
+        return true;
+    });
+    if (changed) {
+        localStorage.setItem('finvault_tx', JSON.stringify(transactions));
+        localStorage.setItem('finvault_recurring', JSON.stringify(recurringRules));
+    }
+}
+
+function stopRecurring(ruleId) {
+    const rule = recurringRules.find(r => r.id == ruleId);
+    if (rule) {
+        rule.active = false;
+        localStorage.setItem('finvault_recurring', JSON.stringify(recurringRules));
+        showToast('Perulangan transaksi dihentikan');
+        renderFullTransactions();
+    }
+}
+
 function handleSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('tx-id').value;
@@ -395,29 +446,50 @@ function handleSubmit(e) {
         const txOut = { ...txData, id: transferId, type: 'expense', account, toAccount: undefined, desc: `Transfer ke ${toAccountName}` };
         const txIn = { ...txData, id: transferId + 1, type: 'income', account: toAccount, desc: `Transfer dari ${fromAccountName}`, transferId };
         transactions.unshift(txOut, txIn);
+        if (recurring) {
+            const ruleId = Date.now() + 2;
+            recurringRules.push({
+                id: ruleId,
+                type: 'transfer',
+                amount,
+                account,
+                toAccount,
+                category: 'Transfer',
+                desc: desc || `Transfer ke ${toAccountName}`,
+                interval: recurringType,
+                nextDate: new Date(new Date(date).setDate(new Date(date).getDate() + 1)).toISOString().split('T')[0],
+                active: true
+            });
+        }
     } else {
         const newTx = { ...txData, id: Date.now() };
         transactions.unshift(newTx);
-        if (recurring) generateRecurringTransactions(newTx);
+        if (recurring) {
+            const nextDate = new Date(date);
+            if (recurringType === 'daily') nextDate.setDate(nextDate.getDate() + 1);
+            else if (recurringType === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
+            else if (recurringType === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
+            recurringRules.push({
+                id: Date.now() + 1,
+                type,
+                amount,
+                account,
+                category,
+                desc,
+                interval: recurringType,
+                nextDate: nextDate.toISOString().split('T')[0],
+                active: true,
+                toAccount: type === 'transfer' ? toAccount : undefined
+            });
+        }
     }
 
     localStorage.setItem('finvault_tx', JSON.stringify(transactions));
+    localStorage.setItem('finvault_recurring', JSON.stringify(recurringRules));
     refreshAll();
     if (!document.getElementById('view-transactions').classList.contains('hidden')) renderFullTransactions();
     closeModal();
     showToast('Transaksi disimpan');
-}
-
-function generateRecurringTransactions(tx) {
-    const interval = { daily: 1, weekly: 7, monthly: 30 }[tx.recurringType];
-    if (!interval) return;
-    const startDate = new Date(tx.date);
-    for (let i = 1; i <= 12; i++) {
-        const nextDate = new Date(startDate);
-        nextDate.setDate(startDate.getDate() + interval * i);
-        if (nextDate > new Date(new Date().setMonth(new Date().getMonth() + 6))) break;
-        transactions.push({ ...tx, id: Date.now() + i, date: nextDate.toISOString().split('T')[0] });
-    }
 }
 
 function deleteTx(id) {
@@ -486,6 +558,7 @@ function updateDateLabel() {
 }
 
 function refreshAll() {
+    processRecurring();
     const filter = document.getElementById('date-filter').value;
     const filtered = transactions.filter(t => t.date.startsWith(filter) && t.type !== 'transfer');
     const inc = filtered.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
@@ -582,6 +655,7 @@ function updateCharts(data) {
 }
 
 function renderFullTransactions() {
+    processRecurring();
     const globalSearch = document.getElementById('tx-search').value.toLowerCase();
     const typeFilter = document.getElementById('tx-type-filter').value;
     const accountFilter = document.getElementById('tx-account-filter').value;
@@ -596,6 +670,7 @@ function renderFullTransactions() {
         const accName = accounts.find(a => a.id == t.account)?.name || t.account;
         const typeClass = t.type === 'income' ? 'text-emerald-600' : t.type === 'expense' ? 'text-slate-800 dark:text-white' : 'text-brand-600';
         const sign = t.type === 'income' ? '+' : t.type === 'expense' ? '-' : '↔';
+        const rule = t.ruleId ? recurringRules.find(r => r.id == t.ruleId) : null;
         return `
         <tr class="hover:bg-slate-100/50 dark:hover:bg-dark-border/30 transition">
             <td class="px-4 md:px-6 py-3 md:py-4"><div class="flex items-center gap-2 md:gap-3"><div class="w-7 h-7 md:w-9 md:h-9 rounded-xl md:rounded-2xl bg-white/60 dark:bg-dark-surface flex items-center justify-center"><i class="fa-solid ${CATEGORY_ICONS[t.category] || 'fa-tag'} text-slate-500 text-xs md:text-base"></i></div><div><p class="font-bold text-xs md:text-sm text-slate-800 dark:text-slate-300">${t.desc || t.category || 'Transfer'}</p><p class="text-[8px] md:text-[9px] text-slate-400 uppercase">${t.date}</p></div></div></td>
@@ -605,6 +680,7 @@ function renderFullTransactions() {
             <td class="px-4 md:px-6 py-3 md:py-4 text-center">
                 <button onclick="editTx(${t.id})" class="w-6 h-6 inline-flex items-center justify-center text-slate-400 hover:text-brand-500"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
                 <button onclick="deleteTx(${t.id})" class="w-6 h-6 inline-flex items-center justify-center text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                ${t.ruleId && rule && rule.active ? `<button onclick="stopRecurring(${t.ruleId})" class="w-6 h-6 inline-flex items-center justify-center text-slate-400 hover:text-amber-500"><i class="fa-solid fa-ban text-xs"></i></button>` : ''}
             </td>
         </tr>`;
     }).join('');
@@ -768,6 +844,7 @@ function renderGoals() {
         <div class="glass bg-white/40 dark:bg-dark-surface/40 p-4 rounded-2xl border border-slate-200/30 dark:border-dark-border/50 hover:shadow-md transition-shadow">
             <div class="flex justify-between items-start">
                 <h4 class="font-bold text-sm md:text-base text-slate-700 dark:text-slate-300">${g.name}</h4>
+                <button onclick="editGoal(${g.id})" class="text-slate-400 hover:text-brand-500 mr-1"><i class="fa-regular fa-pen-to-square text-xs"></i></button>
                 <button onclick="deleteGoal(${g.id})" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash-can text-xs"></i></button>
             </div>
             <div class="mt-2">
@@ -788,22 +865,72 @@ function renderGoals() {
 function openGoalModal(goal = null) {
     document.getElementById('goal-modal').classList.remove('hidden');
     document.getElementById('goal-modal').classList.add('flex');
+    populateAccountSelects();
     if (goal) {
+        document.getElementById('goal-modal-title').innerText = 'Edit Target';
         document.getElementById('goal-id').value = goal.id;
         document.getElementById('goal-name').value = goal.name;
         document.getElementById('goal-target').value = goal.target;
         document.getElementById('goal-current').value = goal.current;
         document.getElementById('goal-deadline').value = goal.deadline || '';
+        document.getElementById('goal-account').value = '';
+        document.getElementById('goal-add-amount').value = '';
     } else {
+        document.getElementById('goal-modal-title').innerText = 'Tambah Target';
         document.getElementById('goal-id').value = '';
         document.getElementById('goal-name').value = '';
         document.getElementById('goal-target').value = '';
         document.getElementById('goal-current').value = '0';
         document.getElementById('goal-deadline').value = '';
+        document.getElementById('goal-account').value = '';
+        document.getElementById('goal-add-amount').value = '';
     }
 }
 
-function closeGoalModal() { document.getElementById('goal-modal').classList.add('hidden'); document.getElementById('goal-modal').classList.remove('flex'); }
+function closeGoalModal() {
+    document.getElementById('goal-modal').classList.add('hidden');
+    document.getElementById('goal-modal').classList.remove('flex');
+}
+
+function addFundsToGoal() {
+    const accountId = document.getElementById('goal-account').value;
+    const amount = parseFloat(document.getElementById('goal-add-amount').value);
+    const goalCurrent = parseFloat(document.getElementById('goal-current').value) || 0;
+    
+    if (!accountId) {
+        alert('Pilih akun terlebih dahulu');
+        return;
+    }
+    if (!amount || amount <= 0) {
+        alert('Masukkan jumlah yang valid');
+        return;
+    }
+    
+    const account = accounts.find(a => a.id == accountId);
+    const accountBalance = getAccountBalance(accountId);
+    
+    if (accountBalance < amount) {
+        alert(`Saldo ${account.name} tidak mencukupi (${formatIDR(accountBalance)})`);
+        return;
+    }
+    
+    const expenseTx = {
+        id: Date.now(),
+        type: 'expense',
+        amount: amount,
+        date: new Date().toISOString().split('T')[0],
+        account: accountId,
+        category: 'Lainnya',
+        desc: `Alokasi dana untuk target`
+    };
+    
+    transactions.unshift(expenseTx);
+    localStorage.setItem('finvault_tx', JSON.stringify(transactions));
+    
+    document.getElementById('goal-current').value = goalCurrent + amount;
+    
+    showToast(`Rp ${amount.toLocaleString()} ditambahkan ke target`);
+}
 
 function saveGoal(e) {
     e.preventDefault();
@@ -813,6 +940,7 @@ function saveGoal(e) {
     const current = parseFloat(document.getElementById('goal-current').value) || 0;
     const deadline = document.getElementById('goal-deadline').value || null;
     const goalData = { name, target, current, deadline };
+    
     if (id) {
         const idx = goals.findIndex(g => g.id == id);
         if (idx !== -1) goals[idx] = { ...goals[idx], ...goalData };
@@ -822,7 +950,13 @@ function saveGoal(e) {
     localStorage.setItem('finvault_goals', JSON.stringify(goals));
     closeGoalModal();
     renderGoals();
+    refreshAll();
     showToast('Target disimpan');
+}
+
+function editGoal(id) {
+    const goal = goals.find(g => g.id == id);
+    if (goal) openGoalModal(goal);
 }
 
 function deleteGoal(id) {
@@ -842,7 +976,7 @@ function downloadCSV() {
     const selisih = inc - exp;
     const totalSaldo = Object.values(calculateBalances()).reduce((a, b) => a + b, 0);
     let csv = 'LAPORAN KEUANGAN BULANAN\n';
-    csv += `Periode :,${formatMonthIndo(filter)}\n`;
+    csv += `Periode:,${formatMonthIndo(filter)}\n`;
     csv += `Total Pemasukan :,${inc}\n`;
     csv += `Total Pengeluaran :,${exp}\n`;
     csv += `Selisih :,${selisih}\n`;
@@ -878,19 +1012,19 @@ function downloadPDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     let y = 35;
-    doc.text('Periode:', 20, y);
+    doc.text('Periode :', 20, y);
     doc.text(formatMonthIndo(filter), 70, y);
     y += 7;
-    doc.text('Total Pemasukan:', 20, y);
+    doc.text('Total Pemasukan :', 20, y);
     doc.text(formatIDR(inc), 70, y);
     y += 7;
-    doc.text('Total Pengeluaran:', 20, y);
+    doc.text('Total Pengeluaran :', 20, y);
     doc.text(formatIDR(exp), 70, y);
     y += 7;
-    doc.text('Selisih:', 20, y);
+    doc.text('Selisih :', 20, y);
     doc.text(formatIDR(selisih), 70, y);
     y += 7;
-    doc.text('Total Saldo:', 20, y);
+    doc.text('Total Saldo :', 20, y);
     doc.text(formatIDR(totalSaldo), 70, y);
     y += 10;
 
@@ -942,7 +1076,7 @@ function saveSettings() {
 }
 
 function backupData() {
-    const data = { transactions, accounts, categories, budgets, debts, reminders, goals, settings };
+    const data = { transactions, accounts, categories, budgets, debts, reminders, goals, settings, recurringRules };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -966,6 +1100,7 @@ function restoreData(event) {
             reminders = data.reminders || [];
             goals = data.goals || [];
             settings = data.settings || { notification: false };
+            recurringRules = data.recurringRules || [];
             localStorage.setItem('finvault_tx', JSON.stringify(transactions));
             localStorage.setItem('finvault_accounts', JSON.stringify(accounts));
             localStorage.setItem('finvault_categories', JSON.stringify(categories));
@@ -974,6 +1109,7 @@ function restoreData(event) {
             localStorage.setItem('finvault_reminders', JSON.stringify(reminders));
             localStorage.setItem('finvault_goals', JSON.stringify(goals));
             localStorage.setItem('finvault_settings', JSON.stringify(settings));
+            localStorage.setItem('finvault_recurring', JSON.stringify(recurringRules));
             migrateData();
             refreshAll();
             renderAccounts();
