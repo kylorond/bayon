@@ -90,6 +90,9 @@
                 <i class="fa-solid fa-rotate w-6 text-lg"></i><span class="nav-text">Restore</span>
                 <input type="file" id="restore-file" accept=".json" class="hidden" onchange="restoreData(event)">
             </button>
+            <button onclick="openGuideModal()" class="nav-item w-full flex items-center px-4 py-3 rounded-2xl text-slate-500 hover:bg-slate-100 dark:hover:bg-dark-border/50 font-medium transition-all gap-4">
+                <i class="fa-solid fa-book-open w-6 text-lg"></i><span class="nav-text">Panduan</span>
+            </button>
         </nav>
 
         <div class="p-5 sidebar-balance">
@@ -250,13 +253,13 @@
                                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm z-10"></i>
                                 <input type="text" id="tx-search" placeholder="Cari..." class="w-full pl-9 pr-4 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm focus:ring-2 focus:ring-brand-500 outline-none">
                             </div>
-                            <select id="tx-type-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer">
+                            <select id="tx-type-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer text-slate-600 dark:text-slate-400">
                                 <option value="all">Semua</option>
                                 <option value="income">Pemasukan</option>
                                 <option value="expense">Pengeluaran</option>
                                 <option value="transfer">Transfer</option>
                             </select>
-                            <select id="tx-account-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer">
+                            <select id="tx-account-filter" onchange="renderFullTransactions()" class="px-3 py-2 bg-white/60 dark:bg-dark-surface/60 border-none rounded-2xl text-xs md:text-sm outline-none font-bold cursor-pointer text-slate-600 dark:text-slate-400">
                                 <option value="all">Semua Akun</option>
                             </select>
                         </div>
@@ -272,7 +275,7 @@
                                     <th class="px-4 md:px-6 py-3 md:py-4 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="full-tx-body" class="divide-y divide-slate-200/30 dark:divide-dark-border text-xs md:text-sm"></tbody>
+                            <tbody id="full-tx-body" class="divide-y divide-slate-200/30 dark:divide-dark-border text-xs md:text-sm text-slate-600 dark:text-slate-400"></tbody>
                         </table>
                     </div>
                 </div>
@@ -382,6 +385,7 @@
     </main>
 </div>
 
+<!-- Modals -->
 <div id="tx-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-md" onclick="closeModal()"></div>
     <div class="glass w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-white/20 dark:border-dark-border">
@@ -624,6 +628,86 @@
                 </label>
             </div>
             <button onclick="saveSettings()" class="w-full py-3 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-2xl font-bold shadow-lg shadow-brand-600/30 hover:from-brand-700 hover:to-brand-600 transition-all">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Guide Modal -->
+<div id="guide-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-md" onclick="closeGuideModal()"></div>
+    <div class="glass w-full max-w-2xl rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-white/20 dark:border-dark-border">
+        <div class="p-4 md:p-6 border-b border-slate-200/30 dark:border-dark-border flex justify-between items-center">
+            <h3 class="text-lg md:text-xl font-extrabold text-slate-700 dark:text-slate-300">📘 Panduan Penggunaan Aplikasi</h3>
+            <button onclick="closeGuideModal()" class="text-slate-400 hover:text-rose-500 transition-all"><i class="fa-solid fa-circle-xmark text-xl md:text-2xl"></i></button>
+        </div>
+        <div class="p-4 md:p-6 max-h-[70vh] overflow-y-auto space-y-4 text-sm">
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">1️⃣ Menambah Akun</h4>
+                <p>Masuk ke menu <span class="font-semibold">Akun</span>, klik tombol <span class="font-semibold">Tambah</span>. Isi nama akun, saldo awal, dan mata uang. Klik Simpan. Akun akan muncul di daftar dan saldo akan diperbarui otomatis berdasarkan transaksi.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">2️⃣ Mengatur Kategori</h4>
+                <p>Masuk ke menu <span class="font-semibold">Kategori</span>. Anda dapat menambah kategori pemasukan atau pengeluaran dengan mengklik tombol <span class="font-semibold">Tambah</span> dan memilih tipe. Kategori yang sudah ada dapat dihapus.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">3️⃣ Menambah Transaksi</h4>
+                <p>Klik tombol <span class="font-semibold">+ Transaksi</span> di pojok kanan header. Pilih tipe (Pengeluaran/Pemasukan/Transfer), isi jumlah, tanggal, akun, kategori dan deskripsi. Centang <span class="font-semibold">Ulangi</span> jika transaksi berulang (harian/mingguan/bulanan). Klik Simpan. Transaksi akan muncul di jurnal dan mempengaruhi saldo.</p>
+                <p class="text-xs italic">💡 Transfer akan membuat dua entri: pengeluaran dari akun asal dan pemasukan ke akun tujuan.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">4️⃣ Mengatur Anggaran</h4>
+                <p>Masuk ke menu <span class="font-semibold">Anggaran</span>. Atur batas pengeluaran per kategori untuk bulan berjalan. Klik <span class="font-semibold">Perbarui Target</span> untuk menyimpan. Progress anggaran akan terlihat di dashboard.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">5️⃣ Menambah Utang/Piutang</h4>
+                <p>Masuk ke menu <span class="font-semibold">Utang/Piutang</span>, klik <span class="font-semibold">Tambah</span>. Pilih tipe (Piutang/Utang), isi nama pihak, jumlah, tanggal, jatuh tempo (opsional) dan keterangan. Status dapat ditandai lunas dengan ikon centang.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">6️⃣ Menambah Pengingat</h4>
+                <p>Masuk ke menu <span class="font-semibold">Pengingat</span>, klik <span class="font-semibold">Tambah</span>. Isi judul, jumlah (opsional), tanggal jatuh tempo dan keterangan. Pengingat akan muncul di daftar dan ditandai jika terlewat.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">7️⃣ Menambah Target Keuangan</h4>
+                <p>Masuk ke menu <span class="font-semibold">Target</span>, klik <span class="font-semibold">Tambah</span>. Isi nama target, nominal target, jumlah terkumpul saat ini, dan batas waktu (opsional). Anda juga dapat menambah dana dari akun tertentu dengan memilih akun dan jumlah, lalu klik <span class="font-semibold">Tambah</span>. Dana akan otomatis dikurangi dari akun tersebut dan menambah progress target.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">8️⃣ Fitur Laporan (CSV/PDF)</h4>
+                <p>Di sidebar, bagian <span class="font-semibold">laporan</span>, klik <span class="font-semibold">Ekspor CSV</span> atau <span class="font-semibold">Cetak PDF</span>. Laporan akan dibuat berdasarkan bulan yang dipilih di filter tanggal (atas). Transfer akan muncul sebagai tipe <span class="font-semibold">Transfer</span> dengan akun asal → tujuan.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">9️⃣ Backup & Restore</h4>
+                <p>Di sidebar bagian <span class="font-semibold">pengaturan</span>, klik <span class="font-semibold">Backup</span> untuk mengunduh file JSON berisi semua data. Untuk mengembalikan data, klik <span class="font-semibold">Restore</span> dan pilih file backup. Data akan ditimpa.</p>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-600">🔟 Preferensi</h4>
+                <p>Di sidebar bagian <span class="font-semibold">pengaturan</span>, klik <span class="font-semibold">Preferensi</span>. Anda dapat mengaktifkan notifikasi browser (akan muncul saat menambah pengingat).</p>
+            </div>
+            <div class="border-t border-slate-200/30 dark:border-dark-border/50 pt-3 mt-2">
+                <p class="text-xs text-slate-500">💡 Semua data disimpan di localStorage browser Anda. Hapus data browser akan menghapus semua catatan.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Welcome Modal (first time) -->
+<div id="welcome-modal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-md" onclick="closeWelcomeModal()"></div>
+    <div class="glass w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-white/20 dark:border-dark-border">
+        <div class="p-6 md:p-8 text-center">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center">
+                <i class="fa-solid fa-hand-wave text-3xl text-brand-600"></i>
+            </div>
+            <h3 class="text-2xl font-extrabold text-slate-800 dark:text-white mb-2">Selamat Datang!</h3>
+            <p class="text-slate-600 dark:text-slate-300 mb-6">Terima kasih telah menggunakan aplikasi Manajemen Keuangan by Ron. Kami telah menyediakan panduan singkat untuk membantu Anda memulai.</p>
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="openGuideModal(); closeWelcomeModal()" class="px-6 py-3 bg-gradient-to-r from-brand-600 to-brand-500 text-white rounded-xl font-bold shadow-md hover:from-brand-700 hover:to-brand-600 transition-all">
+                    📖 Baca Panduan
+                </button>
+                <button onclick="closeWelcomeModal()" id="welcome-read-button" class="px-6 py-3 bg-slate-200 dark:bg-dark-surface text-slate-700 dark:text-slate-300 rounded-xl font-bold hover:bg-slate-300 dark:hover:bg-dark-border transition-all">
+                    Saya sudah membaca
+                </button>
+            </div>
+            <p class="text-xs text-slate-400 mt-4">Pesan ini hanya muncul sekali.</p>
         </div>
     </div>
 </div>
