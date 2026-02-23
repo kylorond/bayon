@@ -1236,6 +1236,27 @@ function saveBudgets(e) {
     showToast('Anggaran diperbarui');
 }
 
+// Guide Modal Functions
+function openGuideModal() {
+    document.getElementById('guide-modal').classList.remove('hidden');
+    document.getElementById('guide-modal').classList.add('flex');
+}
+function closeGuideModal() {
+    document.getElementById('guide-modal').classList.add('hidden');
+    document.getElementById('guide-modal').classList.remove('flex');
+}
+
+// Welcome Modal Functions
+function openWelcomeModal() {
+    document.getElementById('welcome-modal').classList.remove('hidden');
+    document.getElementById('welcome-modal').classList.add('flex');
+}
+function closeWelcomeModal() {
+    document.getElementById('welcome-modal').classList.add('hidden');
+    document.getElementById('welcome-modal').classList.remove('flex');
+    localStorage.setItem('welcomeShown', 'true');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
@@ -1272,6 +1293,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (settings.notification && Notification.permission === 'default') {
         Notification.requestPermission();
+    }
+
+    if (!localStorage.getItem('welcomeShown')) {
+        setTimeout(() => {
+            openWelcomeModal();
+        }, 500);
     }
 });
 
